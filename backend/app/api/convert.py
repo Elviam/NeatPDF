@@ -5,10 +5,10 @@ from app.services.pdf_convert import convert_pdf_to_images
 router = APIRouter()
 
 
-@router.post("/")
+@router.post("")
 async def convert_pdf_endpoint(
     file: UploadFile = File(...),
-    format: str = Query("png", regex="^(png|jpg)$"),
+    format: str = Query("png", pattern="^(png|jpg)$"),
     dpi: int = Query(150, ge=72, le=300)
 ):
     """Convierte un PDF a imágenes PNG o JPG."""
