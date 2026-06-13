@@ -4,6 +4,7 @@ import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
 import * as pdfjsLib from 'pdfjs-dist'
 import pdfWorker from 'pdfjs-dist/build/pdf.worker.min?url'
+import { buildOutputFileName, triggerDownload } from '../utils/fileUtils'
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker
 
@@ -23,9 +24,9 @@ const colorOf = (i) => RANGE_COLORS[i % RANGE_COLORS.length]
 let _id = 0
 const newRange = (start = 1, end = 1) => ({ id: ++_id, start, end })
 
-/* ══════════════════════════════════════════════
+/* 
    CANVAS BASE — renderiza una página del PDF
-══════════════════════════════════════════════ */
+*/
 function PdfPageCanvas({ pdfDoc, pageNum, width = 120 }) {
   const canvasRef  = useRef(null)
   const renderTask = useRef(null)
@@ -61,9 +62,9 @@ function PdfPageCanvas({ pdfDoc, pageNum, width = 120 }) {
   return <canvas ref={canvasRef} style={{ display: 'block', width: '100%', height: 'auto' }} />
 }
 
-/* ══════════════════════════════════════════════
+/*
    PAGE PREVIEW — usado en tarjetas de rango
-══════════════════════════════════════════════ */
+*/
 function PagePreview({ pdfDoc, pageNum, accent = '#93c5fd' }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
@@ -78,9 +79,9 @@ function PagePreview({ pdfDoc, pageNum, accent = '#93c5fd' }) {
   )
 }
 
-/* ══════════════════════════════════════════════
+/* 
    PAGE STEPPER
-══════════════════════════════════════════════ */
+*/
 function PageStepper({ value, min, max, onChange, accent }) {
   const dec = value <= min
   const inc = value >= max
@@ -107,9 +108,9 @@ function PageStepper({ value, min, max, onChange, accent }) {
   )
 }
 
-/* ══════════════════════════════════════════════
+/*
    TIMELINE — segmentos de rangos sobre la línea del PDF
-══════════════════════════════════════════════ */
+*/
 function RangeTimeline({ ranges, totalPages }) {
   if (!totalPages) return null
   return (
@@ -151,9 +152,9 @@ function RangeTimeline({ ranges, totalPages }) {
   )
 }
 
-/* ══════════════════════════════════════════════
+/* 
    RANGE CARD
-══════════════════════════════════════════════ */
+ */
 function RangeCard({ range, index, totalPages, pdfDoc, onChange, onRemove, canRemove, hasOverlap }) {
   const c = colorOf(index)
   const setStart = (v) => onChange({ ...range, start: Math.min(v, range.end) })
@@ -231,9 +232,9 @@ function RangeCard({ range, index, totalPages, pdfDoc, onChange, onRemove, canRe
   )
 }
 
-/* ══════════════════════════════════════════════
+/* 
    MINIATURA SELECCIONABLE — modo "páginas específicas"
-══════════════════════════════════════════════ */
+ */
 function SelectablePageThumb({ pdfDoc, pageNum, selected, onToggle }) {
   return (
     <button
@@ -281,9 +282,9 @@ function SelectablePageThumb({ pdfDoc, pageNum, selected, onToggle }) {
   )
 }
 
-/* ══════════════════════════════════════════════
+/* 
    SPLIT PDF — componente principal
-══════════════════════════════════════════════ */
+ */
 export default function SplitPDF() {
   const navigate = useNavigate()
 
@@ -378,16 +379,6 @@ export default function SplitPDF() {
   }
   const selectAllPages = () => setSelectedPages(new Set(Array.from({ length: totalPages }, (_, i) => i + 1)))
   const clearSelection = () => setSelectedPages(new Set())
-
-  /* ── descarga helper ── */
-  const triggerDownload = (data, name) => {
-    const url = window.URL.createObjectURL(new Blob([data]))
-    const a   = document.createElement('a')
-    a.href    = url; a.setAttribute('download', name)
-    document.body.appendChild(a); a.click(); a.remove()
-    window.URL.revokeObjectURL(url)
-  }
-
   const buildFD = () => { const fd = new FormData(); fd.append('file', file.file); return fd }
 
   /* empaqueta varios blobs en ZIP, con fallback secuencial */
@@ -413,7 +404,7 @@ export default function SplitPDF() {
     setLoading(true); setError(''); setSuccess('')
     try {
       const res = await axios.post(SPLIT_ALL_API, buildFD(), { headers: { 'Content-Type': 'multipart/form-data' }, responseType: 'blob' })
-      triggerDownload(res.data, 'split_pages.zip')
+      triggerDownload(res.data, buildOutputFileName(file.name, 'split', 'zip'))
       setSuccess('✓ PDF separado exitosamente!')
       removeFile()
     } catch (e) {
@@ -435,11 +426,11 @@ export default function SplitPDF() {
       )
       const results = await Promise.all(requests)
 
-      await downloadResults(
+     await downloadResults(
         results,
-        (r, i) => `rango_${i + 1}_p${r.range.start}-${r.range.end}.pdf`,
-        'rangos_extraidos.zip',
-        (r) => `paginas_${r.range.start}-${r.range.end}.pdf`,
+        (r, i) => `${file.name.replace(/\.pdf$/i, '')}_split_p${r.range.start}-${r.range.end}.pdf`,
+        buildOutputFileName(file.name, 'split', 'zip'),
+        (r) => `${file.name.replace(/\.pdf$/i, '')}_split_p${r.range.start}-${r.range.end}.pdf`,
       )
 
       setSuccess(results.length === 1
@@ -469,9 +460,9 @@ export default function SplitPDF() {
 
       await downloadResults(
         results,
-        (r) => `pagina_${r.page}.pdf`,
-        'paginas_seleccionadas.zip',
-        (r) => `pagina_${r.page}.pdf`,
+        (r) => `${file.name.replace(/\.pdf$/i, '')}_split_p${r.page}.pdf`,
+        buildOutputFileName(file.name, 'split', 'zip'),
+        (r) => `${file.name.replace(/\.pdf$/i, '')}_split_p${r.page}.pdf`,
       )
 
       setSuccess(`✓ ${results.length} página${results.length > 1 ? 's' : ''} extraída${results.length > 1 ? 's' : ''} exitosamente!`)

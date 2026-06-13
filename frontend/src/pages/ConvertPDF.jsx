@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Upload, X, Download, AlertCircle, Image as ImageIcon } from 'lucide-react'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
+import { buildOutputFileName, triggerDownload } from '../utils/fileUtils'
 
 const CONVERT_API = 'http://localhost:8000/api/convert'
 
@@ -82,14 +83,7 @@ export default function ConvertPDF() {
       })
 
       // Descargar el archivo ZIP
-      const url = window.URL.createObjectURL(new Blob([response.data]))
-      const link = document.createElement('a')
-      link.href = url
-      link.setAttribute('download', `converted_${format}.zip`)
-      document.body.appendChild(link)
-      link.click()
-      link.parentNode.removeChild(link)
-      window.URL.revokeObjectURL(url)
+      triggerDownload(response.data, buildOutputFileName(file.name, 'images', 'zip'))
 
       setSuccessMessage(`✓ PDF convertido a ${format.toUpperCase()} exitosamente!`)
       removeFile()

@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Upload, X, Download, AlertCircle, Zap } from 'lucide-react'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
+import { buildOutputFileName, triggerDownload } from '../utils/fileUtils'
 
 const COMPRESS_API = 'http://localhost:8000/api/compress'
 
@@ -87,14 +88,7 @@ export default function CompressPDF() {
       const reduction = Math.round(((originalSize - compressedSize) / originalSize) * 100)
 
       // Descargar el archivo
-      const url = window.URL.createObjectURL(new Blob([response.data]))
-      const link = document.createElement('a')
-      link.href = url
-      link.setAttribute('download', 'compressed.pdf')
-      document.body.appendChild(link)
-      link.click()
-      link.parentNode.removeChild(link)
-      window.URL.revokeObjectURL(url)
+      triggerDownload(response.data, buildOutputFileName(file.name, 'compressed', 'pdf'))
 
       setSuccessMessage(
         `✓ PDF comprimido exitosamente! (${reduction}% de reducción)`

@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Upload, X, ChevronUp, ChevronDown, Download } from 'lucide-react'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
+import { buildOutputFileName, triggerDownload } from '../utils/fileUtils'
 
 const UPLOAD_API = 'http://localhost:8000/api/merge/upload'
 const MERGE_API = 'http://localhost:8000/api/merge'
@@ -123,14 +124,7 @@ export default function MergePDF() {
       })
 
       // Descargar el archivo
-      const url = window.URL.createObjectURL(new Blob([response.data]))
-      const link = document.createElement('a')
-      link.href = url
-      link.setAttribute('download', 'merged.pdf')
-      document.body.appendChild(link)
-      link.click()
-      link.parentNode.removeChild(link)
-      window.URL.revokeObjectURL(url)
+      triggerDownload(response.data, buildOutputFileName(files[0].name, 'merged', 'pdf'))
 
       setSuccessMessage('✓ PDFs unidos exitosamente!')
       setFiles([])
