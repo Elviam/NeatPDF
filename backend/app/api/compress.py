@@ -5,10 +5,10 @@ from app.services.pdf_compress import compress_pdf
 router = APIRouter()
 
 
-@router.post("/")
+@router.post("")
 async def compress_pdf_endpoint(
     file: UploadFile = File(...),
-    quality: str = Query("medium", regex="^(low|medium|high)$")
+    quality: str = Query("medium", pattern="^(low|medium|high)$")
 ):
     """Comprime un PDF reduciendo su tamaño."""
     if file.content_type != "application/pdf":
