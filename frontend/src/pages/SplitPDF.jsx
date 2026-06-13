@@ -9,6 +9,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker
 
 const SPLIT_ALL_API   = 'http://localhost:8000/api/split/all'
 const SPLIT_RANGE_API = 'http://localhost:8000/api/split/range'
+const MERGE_API = 'http://localhost:8000/api/merge/'
 
 /* paleta de colores por índice de rango */
 const RANGE_COLORS = [
@@ -297,6 +298,7 @@ export default function SplitPDF() {
   const [pdfDoc,        setPdfDoc]        = useState(null)
   const [ranges,        setRanges]        = useState([newRange(1, 1)])
   const [selectedPages, setSelectedPages] = useState(new Set())
+  const [pagesOutputMode, setPagesOutputMode] = useState('merge') // 'merge' | 'separate'
 
   /* ── páginas que aparecen en más de un rango ── */
   const overlapInfo = useMemo(() => {
@@ -406,6 +408,17 @@ export default function SplitPDF() {
       results.forEach((r, i) => setTimeout(() => triggerDownload(r.blob, fileNameFn(r, i)), i * 300))
     }
   }
+  const mergeBlobs = async (results) => {
+  const fd = new FormData()
+  results.forEach((r, i) => {
+    fd.append('files', new File([r.blob], `page_${i + 1}.pdf`, { type: 'application/pdf' }))
+  })
+  const res = await axios.post(MERGE_API, fd, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+    responseType: 'blob',
+  })
+  return res.data
+}
 
   /* ── split all ── */
   const handleSplitAll = async () => {
@@ -453,7 +466,7 @@ export default function SplitPDF() {
   }
 
   /* ── split por páginas específicas ── */
-  const handleExtractPages = async () => {
+ const handleExtractPages = async () => {
     if (!file || selectedPages.size === 0) return
     setLoading(true); setError(''); setSuccess('')
     try {
@@ -467,20 +480,25 @@ export default function SplitPDF() {
       )
       const results = await Promise.all(requests)
 
-      await downloadResults(
-        results,
-        (r) => `pagina_${r.page}.pdf`,
-        'paginas_seleccionadas.zip',
-        (r) => `pagina_${r.page}.pdf`,
-      )
-
-      setSuccess(`✓ ${results.length} página${results.length > 1 ? 's' : ''} extraída${results.length > 1 ? 's' : ''} exitosamente!`)
+      if (pagesOutputMode === 'merge' && results.length > 1) {
+        const mergedBlob = await mergeBlobs(results)
+        triggerDownload(mergedBlob, `${file.name.replace(/\.pdf$/i, '')}_combined_pages.pdf`)
+        setSuccess(`✓ ${results.length} páginas combinadas en un solo PDF!`)
+      } else {
+        await downloadResults(
+          results,
+          (r) => `${file.name.replace(/\.pdf$/i, '')}_split_p${r.page}.pdf`,
+          `${file.name.replace(/\.pdf$/i, '')}_split.zip`,
+          (r) => `${file.name.replace(/\.pdf$/i, '')}_split_p${r.page}.pdf`,
+        )
+        setSuccess(`✓ ${results.length} página${results.length > 1 ? 's' : ''} extraída${results.length > 1 ? 's' : ''} exitosamente!`)
+      }
       removeFile()
     } catch (e) {
+      console.error(e)
       setError(e.response?.data?.detail || 'Error al extraer páginas')
     } finally { setLoading(false) }
   }
-
   const fmt = (b) => { if (!b) return '0 B'; const k = 1024, s = ['B', 'KB', 'MB']; const i = Math.floor(Math.log(b) / Math.log(k)); return Math.round(b / Math.pow(k, i) * 100) / 100 + ' ' + s[i] }
 
   /* ════════════════════ RENDER ════════════════════ */
@@ -703,9 +721,31 @@ export default function SplitPDF() {
 
                 {/* resumen de selección */}
                 {selectedPages.size > 0 && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(147,197,253,.06)', border: '1px solid rgba(147,197,253,.18)', borderRadius: 9, padding: '10px 14px', marginBottom: 20, fontSize: 12, color: 'rgba(255,255,255,.5)', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(147,197,253,.06)', border: '1px solid rgba(147,197,253,.18)', borderRadius: 9, padding: '10px 14px', marginBottom: 10, fontSize: 12, color: 'rgba(255,255,255,.5)', flexWrap: 'wrap' }}>
                     <span style={{ fontWeight: 700, color: '#93c5fd', flexShrink: 0 }}>Páginas:</span>
                     <span>{[...selectedPages].sort((a, b) => a - b).join(', ')}</span>
+                  </div>
+                )}
+
+                {/* selector de salida — solo si hay más de 1 página */}
+                {selectedPages.size > 1 && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20, flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,.5)' }}>Salida:</span>
+                    <div style={{ display: 'flex', gap: 6 }}>
+                      {[
+                        ['merge', 'Un solo PDF'],
+                        ['separate', 'Archivos separados'],
+                      ].map(([m, l]) => (
+                        <button key={m} onClick={() => setPagesOutputMode(m)} style={{
+                          padding: '6px 13px',
+                          background: pagesOutputMode === m ? 'rgba(147,197,253,.15)' : 'rgba(255,255,255,.04)',
+                          border: `1px solid ${pagesOutputMode === m ? 'rgba(147,197,253,.4)' : 'rgba(255,255,255,.09)'}`,
+                          color: pagesOutputMode === m ? '#93c5fd' : 'rgba(255,255,255,.5)',
+                          borderRadius: 100, cursor: 'pointer', fontWeight: pagesOutputMode === m ? 600 : 400,
+                          fontSize: 12, transition: 'all .2s',
+                        }}>{l}</button>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
@@ -777,10 +817,12 @@ export default function SplitPDF() {
                 boxShadow: (loading || selectedPages.size === 0) ? 'none' : '0 6px 20px rgba(147,197,253,.25)',
               }}>
                 {loading
-                  ? <><Spinner dark={selectedPages.size > 0}/> Extrayendo…</>
+                  ? <><Spinner dark={selectedPages.size > 0}/> {pagesOutputMode === 'merge' && selectedPages.size > 1 ? 'Combinando…' : 'Extrayendo…'}</>
                   : selectedPages.size === 0
                     ? 'Selecciona al menos una página'
-                    : <><Download size={17}/>Extraer {selectedPages.size} página{selectedPages.size > 1 ? 's' : ''} seleccionada{selectedPages.size > 1 ? 's' : ''}</>
+                    : pagesOutputMode === 'merge' && selectedPages.size > 1
+                      ? <><Download size={17}/>Combinar {selectedPages.size} páginas en un PDF</>
+                      : <><Download size={17}/>Extraer {selectedPages.size} página{selectedPages.size > 1 ? 's' : ''} seleccionada{selectedPages.size > 1 ? 's' : ''}</>
                 }
               </button>
             )}
