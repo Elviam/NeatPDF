@@ -12,6 +12,14 @@ class Settings(BaseSettings):
         "http://127.0.0.1:5174",
     ]
 
+    # Base de datos
+    database_url: str
+
+    # JWT
+    secret_key: str
+    algorithm: str = "HS256"
+    access_token_expire_minutes: int = 60
+
     class Config:
         env_file = ".env"
 

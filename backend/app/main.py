@@ -1,7 +1,14 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
 from app.core.config import settings
-from app.api import merge, split, compress, convert
+from app.db.base import Base
+from app.db.session import engine
+import app.models  # registra todos los modelos en Base.metadata
+from app.api import merge, split, compress, convert, auth
+
+# Crea las tablas en PostgreSQL al arrancar (si no existen)
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title=settings.app_name,
@@ -17,6 +24,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(auth.router,     prefix="/api/auth",     tags=["Auth"])
 app.include_router(merge.router,    prefix="/api/merge",    tags=["Merge"])
 app.include_router(split.router,    prefix="/api/split",    tags=["Split"])
 app.include_router(compress.router, prefix="/api/compress", tags=["Compress"])
