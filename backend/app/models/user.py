@@ -1,5 +1,6 @@
 from sqlalchemy import Boolean, Column, DateTime, Integer, String
 from sqlalchemy.sql import func
+from sqlalchemy.orm import relationship
 
 from app.db.base import Base
 
@@ -13,3 +14,4 @@ class User(Base):
     full_name = Column(String, nullable=True)
     is_active = Column(Boolean, default=True, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    documents = relationship("Document", back_populates="owner", cascade="all, delete-orphan")

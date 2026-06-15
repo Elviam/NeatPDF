@@ -6,6 +6,7 @@ from app.db.base import Base
 from app.db.session import engine
 import app.models  # registra todos los modelos en Base.metadata
 from app.api import merge, split, compress, convert, auth
+from app.api import auth, documents
 
 # Crea las tablas en PostgreSQL al arrancar (si no existen)
 Base.metadata.create_all(bind=engine)
@@ -29,6 +30,7 @@ app.include_router(merge.router,    prefix="/api/merge",    tags=["Merge"])
 app.include_router(split.router,    prefix="/api/split",    tags=["Split"])
 app.include_router(compress.router, prefix="/api/compress", tags=["Compress"])
 app.include_router(convert.router,  prefix="/api/convert",  tags=["Convert"])
+app.include_router(documents.router, prefix="/api/documents", tags=["Documents"])
 
 @app.get("/")
 def root():
