@@ -9,11 +9,10 @@ from app.db.session import get_db
 from app.models.document import Document
 from app.models.user import User
 from app.services.pdf_merge import merge_pdfs
-from app.services.storage import save_file
+from app.services.storage import save_file, generate_thumbnail
 
 router = APIRouter()
 
-# opcional — no lanza error si no hay token
 oauth2_optional = OAuth2PasswordBearer(tokenUrl="/api/auth/login", auto_error=False)
 
 
@@ -21,7 +20,6 @@ def get_optional_user(
     token: str = Depends(oauth2_optional),
     db: Session = Depends(get_db),
 ) -> User | None:
-    """Devuelve el usuario si hay token válido, None si no hay sesión."""
     if not token:
         return None
     try:
@@ -50,11 +48,11 @@ async def merge_pdfs_endpoint(
     files_bytes = [await file.read() for file in files]
     merged_pdf = merge_pdfs(files_bytes)
 
-    # Guardar en disco + BD si hay usuario autenticado
     if current_user:
-        first_name = files[0].filename or "document"
-        output_name = first_name.replace(".pdf", "") + "_merged.pdf"
+        base = (files[0].filename or "document").replace(".pdf", "")
+        output_name = f"{base}_merged.pdf"
         file_path = save_file(current_user.id, "merge", output_name, merged_pdf)
+        thumb_path = generate_thumbnail(current_user.id, "merge", output_name.replace(".pdf", ""), merged_pdf)
 
         doc = Document(
             user_id=current_user.id,
@@ -63,6 +61,7 @@ async def merge_pdfs_endpoint(
             tool="merge",
             mime_type="application/pdf",
             file_size=len(merged_pdf),
+            thumbnail_path=thumb_path,
         )
         db.add(doc)
         db.commit()

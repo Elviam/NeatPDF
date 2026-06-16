@@ -9,7 +9,7 @@ from app.db.session import get_db
 from app.models.document import Document
 from app.models.user import User
 from app.services.pdf_compress import compress_pdf
-from app.services.storage import save_file
+from app.services.storage import save_file, generate_thumbnail
 
 router = APIRouter()
 
@@ -47,8 +47,10 @@ async def compress_pdf_endpoint(
         compressed_content = compress_pdf(file_bytes, quality)
 
         if current_user:
-            output_name = (file.filename or "document").replace(".pdf", "") + "_compressed.pdf"
+            base = (file.filename or "document").replace(".pdf", "")
+            output_name = f"{base}_compressed.pdf"
             file_path = save_file(current_user.id, "compress", output_name, compressed_content)
+            thumb_path = generate_thumbnail(current_user.id, "compress", output_name.replace(".pdf", ""), compressed_content)
 
             doc = Document(
                 user_id=current_user.id,
@@ -57,6 +59,7 @@ async def compress_pdf_endpoint(
                 tool="compress",
                 mime_type="application/pdf",
                 file_size=len(compressed_content),
+                thumbnail_path=thumb_path,
             )
             db.add(doc)
             db.commit()

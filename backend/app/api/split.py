@@ -9,7 +9,7 @@ from app.db.session import get_db
 from app.models.document import Document
 from app.models.user import User
 from app.services.pdf_split import split_pdf, split_pdf_all_pages
-from app.services.storage import save_file
+from app.services.storage import save_file, generate_thumbnail
 
 router = APIRouter()
 
@@ -46,9 +46,11 @@ async def split_all_pages(
         zip_content = split_pdf_all_pages(file_bytes)
 
         if current_user:
-            output_name = (file.filename or "document").replace(".pdf", "") + "_split.zip"
+            base = (file.filename or "document").replace(".pdf", "")
+            output_name = f"{base}_split.zip"
             file_path = save_file(current_user.id, "split", output_name, zip_content)
 
+            # ZIP no tiene thumbnail
             doc = Document(
                 user_id=current_user.id,
                 filename=output_name,
@@ -56,6 +58,7 @@ async def split_all_pages(
                 tool="split",
                 mime_type="application/zip",
                 file_size=len(zip_content),
+                thumbnail_path=None,
             )
             db.add(doc)
             db.commit()
@@ -88,6 +91,7 @@ async def split_page_range(
             base = (file.filename or "document").replace(".pdf", "")
             output_name = f"{base}_split_p{start_page}-{end_page}.pdf"
             file_path = save_file(current_user.id, "split", output_name, split_content)
+            thumb_path = generate_thumbnail(current_user.id, "split", output_name.replace(".pdf", ""), split_content)
 
             doc = Document(
                 user_id=current_user.id,
@@ -96,6 +100,7 @@ async def split_page_range(
                 tool="split",
                 mime_type="application/pdf",
                 file_size=len(split_content),
+                thumbnail_path=thumb_path,
             )
             db.add(doc)
             db.commit()

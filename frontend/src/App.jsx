@@ -5,6 +5,7 @@ import SplitPDF from './pages/SplitPDF'
 import CompressPDF from './pages/CompressPDF'
 import ConvertPDF from './pages/ConvertPDF'
 import Navbar from './components/Navbar'
+import MyDocuments from './pages/MyDocuments'
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
           <Route path="/split" element={<SplitPDF />} />
           <Route path="/compress" element={<CompressPDF />} />
           <Route path="/convert" element={<ConvertPDF />} />
+          <Route path="/documents" element={<MyDocuments />} />
         </Routes>
       </div>
     </BrowserRouter>
