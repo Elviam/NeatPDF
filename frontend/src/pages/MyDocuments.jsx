@@ -313,14 +313,6 @@ export default function MyDocuments() {
     <div style={{ minHeight: '100vh', padding: 'clamp(1.5rem,4vw,2.5rem)' }}>
       <div style={{ maxWidth: 900, margin: '0 auto' }}>
 
-        {/* ── Volver ── */}
-        <button
-          onClick={() => navigate('/')}
-          style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,.6)', cursor: 'pointer', fontSize: 14, marginBottom: 28, padding: 0, display: 'flex', alignItems: 'center', gap: 4, transition: 'color .15s' }}
-          onMouseEnter={e => e.currentTarget.style.color = '#fff'}
-          onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,.6)'}
-        >← Volver</button>
-
         {/* ── Header ── */}
         <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 24, flexWrap: 'wrap', gap: 16 }}>
           <div>

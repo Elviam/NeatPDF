@@ -124,23 +124,6 @@ export default function ConvertPDF() {
     <div style={{ minHeight: '100vh', padding: '2rem' }}>
       <div style={{ maxWidth: 800, margin: '0 auto' }}>
         {/* Header */}
-        <button
-          onClick={() => navigate('/')}
-          style={{
-            background: 'none',
-            border: 'none',
-            color: 'rgba(255,255,255,.7)',
-            cursor: 'pointer',
-            fontSize: 14,
-            marginBottom: 32,
-            padding: 0,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 4,
-          }}
-        >
-          ← Volver
-        </button>
 
         <h1 style={{
           fontFamily: '"Akt", sans-serif',

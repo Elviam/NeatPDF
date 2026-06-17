@@ -6,11 +6,13 @@ import CompressPDF from './pages/CompressPDF'
 import ConvertPDF from './pages/ConvertPDF'
 import Navbar from './components/Navbar'
 import MyDocuments from './pages/MyDocuments'
+import ScrollToTop from './components/ScrollToTop'
 
 function App() {
   return (
     <BrowserRouter>
       <div>
+        <ScrollToTop />
         <Navbar />
         <Routes>
           <Route path="/" element={<Home />} />

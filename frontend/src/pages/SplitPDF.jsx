@@ -506,11 +506,6 @@ export default function SplitPDF() {
     <div style={{ minHeight: '100vh', padding: 'clamp(1rem,4vw,2rem)' }}>
       <div style={{ maxWidth: 800, margin: '0 auto' }}>
 
-        <button onClick={() => navigate('/')} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,.6)', cursor: 'pointer', fontSize: 14, marginBottom: 24, padding: 0, display: 'flex', alignItems: 'center', gap: 4, transition: 'color .15s' }}
-          onMouseEnter={e => e.currentTarget.style.color = '#fff'}
-          onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,.6)'}
-        >← Volver</button>
-
         <h1 style={{ fontFamily: '"Akt",sans-serif', fontWeight: 800, fontSize: 'clamp(28px,8vw,42px)', color: '#fff', marginBottom: 8, letterSpacing: '-1px' }}>
           Separar PDF
         </h1>

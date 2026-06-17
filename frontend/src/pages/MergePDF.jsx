@@ -7,7 +7,6 @@ const UPLOAD_API = 'http://localhost:8000/api/merge/upload'
 const MERGE_API = 'http://localhost:8000/api/merge'
 
 export default function MergePDF() {
-  const navigate = useNavigate()
   const [files, setFiles] = useState([])
   const [dragActive, setDragActive] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -153,24 +152,7 @@ export default function MergePDF() {
     <div style={{ minHeight: '100vh', padding: '2rem' }}>
       <div style={{ maxWidth: 800, margin: '0 auto' }}>
         {/* Header */}
-        <button
-          onClick={() => navigate('/')}
-          style={{
-            background: 'none',
-            border: 'none',
-            color: 'rgba(255,255,255,.7)',
-            cursor: 'pointer',
-            fontSize: 14,
-            marginBottom: 32,
-            padding: 0,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 4,
-          }}
-        >
-          ← Volver
-        </button>
-
+        
         <h1 style={{
           fontFamily: '"Akt", sans-serif',
           fontWeight: 800,

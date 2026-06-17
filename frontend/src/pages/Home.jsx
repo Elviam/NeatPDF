@@ -2,9 +2,7 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Footer from '../components/Footer'
 
-/* ─────────────────────────────────────────
-   ESTILOS GLOBALES
-───────────────────────────────────────── */
+/* ==== ESTILOS GLOBALES ====*/
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&display=swap');
 
@@ -80,7 +78,7 @@ function InjectStyles() {
   return <style dangerouslySetInnerHTML={{ __html: styles }} />
 }
 
-/* ─── Tool anims ─── */
+/* Tool anims ====*/
 function MergeAnim()    { return <><div className="merge-doc a"/><div className="merge-doc b"/><div className="merge-doc c"/></> }
 function SplitAnim()    { return <><div className="split-doc main"/><div className="split-doc out-a"/><div className="split-doc out-b"/><div className="split-line"/></> }
 function CompressAnim() { return <><div className="compress-doc"/><div className="compress-arrows"><span>↓</span><span>↑</span><span>→</span><span>←</span></div></> }
@@ -95,7 +93,7 @@ const tools = [
 
 const FOLD = 44
 
-/* ─── Tool Card ─── */
+/* ==== Tool Card ==== */
 function ToolCard({ tool, onClick }) {
   const [hov, setHov] = useState(false)
   return (
@@ -143,7 +141,7 @@ function ToolCard({ tool, onClick }) {
   )
 }
 
-/* ─── Hero floating card ─── */
+/* ==== Hero floating card ==== */
 function FloatCard({ style, accent, animName, delay, children }) {
   return (
     <div style={{
@@ -179,9 +177,9 @@ function FPill({ color, bg, border, children }) {
   return <div style={{display:'inline-flex',alignItems:'center',gap:5,marginTop:10,padding:'3px 10px',borderRadius:100,background:bg,border:`1px solid ${border}`,fontSize:10,fontWeight:700,color}}>{children}</div>
 }
 
-/* ─────────────────────────────────────────
-   HOME
-───────────────────────────────────────── */
+/* 
+  ==== HOME ====
+*/
 function Home() {
   const navigate = useNavigate()
 
