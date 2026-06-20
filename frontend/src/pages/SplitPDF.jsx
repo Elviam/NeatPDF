@@ -4,6 +4,7 @@ import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
 import * as pdfjsLib from 'pdfjs-dist'
 import pdfWorker from 'pdfjs-dist/build/pdf.worker.min?url'
+import Button from '../components/ButtonDownload';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker
 
@@ -300,6 +301,31 @@ export default function SplitPDF() {
   const [selectedPages, setSelectedPages] = useState(new Set())
   const [pagesOutputMode, setPagesOutputMode] = useState('merge') // 'merge' | 'separate'
 
+  /* contenedor de la galería — usado para calcular cuántas columnas
+     entran realmente y así fijar la altura de exactamente 2 filas */
+  const galleryRef = useRef(null)
+  const [galleryRowHeight, setGalleryRowHeight] = useState(null)
+
+  useEffect(() => {
+    if (splitMode !== 'pages' || !pdfDoc) return
+    // Espera al siguiente frame para medir después del render
+    const measure = () => {
+      const container = galleryRef.current
+      if (!container) return
+      const firstThumb = container.querySelector('button')
+      if (firstThumb) {
+        const h = firstThumb.getBoundingClientRect().height
+        if (h > 0) setGalleryRowHeight(h)
+      }
+    }
+    const raf = requestAnimationFrame(measure)
+    window.addEventListener('resize', measure)
+    return () => {
+      cancelAnimationFrame(raf)
+      window.removeEventListener('resize', measure)
+    }
+  }, [splitMode, pdfDoc, totalPages])
+
   /* ── páginas que aparecen en más de un rango ── */
   const overlapInfo = useMemo(() => {
     if (ranges.length < 2) return []
@@ -354,7 +380,7 @@ export default function SplitPDF() {
   const removeFile = () => {
     setFile(null); setTotalPages(null); setPdfDoc(null)
     setRanges([newRange(1, 1)]); setSelectedPages(new Set())
-    setError(''); setSuccess('')
+    setError(''); 
   }
 
   /* ── drag & drop ── */
@@ -428,6 +454,7 @@ export default function SplitPDF() {
       const res = await axios.post(SPLIT_ALL_API, buildFD(), { headers: { 'Content-Type': 'multipart/form-data' }, responseType: 'blob' })
       triggerDownload(res.data, 'split_pages.zip')
       setSuccess('✓ PDF separado exitosamente!')
+      setTimeout(() => setSuccess(''), 4000)
       removeFile()
     } catch (e) {
       setError(e.response?.data?.detail || 'Error al separar el PDF')
@@ -500,6 +527,12 @@ export default function SplitPDF() {
     } finally { setLoading(false) }
   }
   const fmt = (b) => { if (!b) return '0 B'; const k = 1024, s = ['B', 'KB', 'MB']; const i = Math.floor(Math.log(b) / Math.log(k)); return Math.round(b / Math.pow(k, i) * 100) / 100 + ' ' + s[i] }
+
+  // Altura del contenedor de la galería: exactamente 2 filas + gap + padding del contenedor.
+  // Si aún no se ha medido (primer render), usamos un fallback razonable.
+  const galleryMaxHeight = galleryRowHeight
+    ? Math.ceil(galleryRowHeight * 3 + 24 /* gap entre filas */ + 32 /* padding del contenedor */)
+    : 380
 
   /* ════════════════════ RENDER ════════════════════ */
   return (
@@ -691,12 +724,18 @@ export default function SplitPDF() {
                   </div>
                 </div>
 
-                {/* galería de páginas */}
-                <div style={{
-                  background: 'rgba(255,255,255,.025)', border: '1px solid rgba(255,255,255,.08)',
-                  borderRadius: 12, padding: 16, marginBottom: 20,
-                  maxHeight: 460, overflowY: 'auto',
-                }}>
+                {/* galería de páginas — altura limitada a exactamente 2 filas */}
+                <div
+                  ref={galleryRef}
+                  style={{
+                    background: 'rgba(255,255,255,.025)', border: '1px solid rgba(255,255,255,.08)',
+                    borderRadius: 12, padding: 16, marginBottom: 20,
+                    maxHeight: galleryMaxHeight,
+                    overflowY: 'auto',
+                    scrollbarWidth: 'thin',
+                    scrollbarColor: 'rgba(147,197,253,.3) transparent',
+                  }}
+                >
                   {pdfDoc ? (
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(76px, 1fr))', gap: 12 }}>
                       {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
@@ -762,68 +801,46 @@ export default function SplitPDF() {
 
         {/* ── botón de acción ── */}
         {file && (
-          <>
-            {splitMode === 'all' && (
-              <button onClick={handleSplitAll} disabled={loading} style={{
-                width: '100%', padding: '14px',
-                background: loading ? 'rgba(147,197,253,.25)' : 'linear-gradient(135deg,#93c5fd,#60a5fa)',
-                border: 'none', color: '#000', fontSize: 15, fontWeight: 700,
-                borderRadius: 10, cursor: loading ? 'not-allowed' : 'pointer',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                opacity: loading ? 0.7 : 1, transition: 'all .25s',
-                boxShadow: loading ? 'none' : '0 6px 20px rgba(147,197,253,.25)',
-              }}>
-                {loading ? <><Spinner/> Separando…</> : <><Download size={17}/>Separar todas las páginas</>}
-              </button>
-            )}
+        <>
+      {splitMode === 'all' && (
+        <Button 
+          onClick={handleSplitAll} 
+          loading={loading}
+          icon={Download}
+          sticky
+        >
+          Separar todas las páginas
+        </Button>
+      )}
 
-            {splitMode === 'range' && totalPages > 1 && (
-              <button onClick={handleSplitRanges} disabled={loading} style={{
-                width: '100%', padding: '14px',
-                background: loading ? 'rgba(147,197,253,.25)' : 'linear-gradient(135deg,#93c5fd,#60a5fa)',
-                border: 'none', color: '#000', fontSize: 15, fontWeight: 700,
-                borderRadius: 10, cursor: loading ? 'not-allowed' : 'pointer',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                opacity: loading ? 0.7 : 1, transition: 'all .25s',
-                boxShadow: loading ? 'none' : '0 6px 20px rgba(147,197,253,.25)',
-              }}>
-                {loading ? (
-                  <><Spinner/> Extrayendo {ranges.length > 1 ? `${ranges.length} rangos` : ''}…</>
-                ) : (
-                  <><Download size={17}/>
-                    {ranges.length === 1
-                      ? `Extraer páginas ${ranges[0].start}–${ranges[0].end}`
-                      : `Extraer ${ranges.length} rangos · ${ranges.reduce((a, r) => a + (r.end - r.start + 1), 0)}p`}
-                  </>
-                )}
-              </button>
-            )}
+      {splitMode === 'range' && totalPages > 1 && (
+        <Button 
+          onClick={handleSplitRanges} 
+          loading={loading}
+          icon={Download}
+          sticky
+        >
+          {ranges.length === 1
+            ? `Extraer páginas ${ranges[0].start}–${ranges[0].end}`
+            : `Extraer ${ranges.length} rangos · ${ranges.reduce((a, r) => a + (r.end - r.start + 1), 0)}p`}
+        </Button>
+      )}
 
-            {splitMode === 'pages' && totalPages > 1 && (
-              <button onClick={handleExtractPages} disabled={loading || selectedPages.size === 0} style={{
-                width: '100%', padding: '14px',
-                background: (loading || selectedPages.size === 0) ? 'rgba(147,197,253,.15)' : 'linear-gradient(135deg,#93c5fd,#60a5fa)',
-                border: 'none',
-                color: (loading || selectedPages.size === 0) ? 'rgba(255,255,255,.35)' : '#000',
-                fontSize: 15, fontWeight: 700,
-                borderRadius: 10, cursor: (loading || selectedPages.size === 0) ? 'not-allowed' : 'pointer',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                transition: 'all .25s',
-                boxShadow: (loading || selectedPages.size === 0) ? 'none' : '0 6px 20px rgba(147,197,253,.25)',
-              }}>
-                {loading
-                  ? <><Spinner dark={selectedPages.size > 0}/> {pagesOutputMode === 'merge' && selectedPages.size > 1 ? 'Combinando…' : 'Extrayendo…'}</>
-                  : selectedPages.size === 0
-                    ? 'Selecciona al menos una página'
-                    : pagesOutputMode === 'merge' && selectedPages.size > 1
-                      ? <><Download size={17}/>Combinar {selectedPages.size} páginas en un PDF</>
-                      : <><Download size={17}/>Extraer {selectedPages.size} página{selectedPages.size > 1 ? 's' : ''} seleccionada{selectedPages.size > 1 ? 's' : ''}</>
-                }
-              </button>
-            )}
-          </>
-        )}
-
+      {splitMode === 'pages' && totalPages > 1 && (
+        <Button
+          onClick={handleExtractPages}
+          loading={loading}
+          disabled={selectedPages.size === 0}
+          icon={Download}
+          sticky
+        >
+          {selectedPages.size === 0
+            ? 'Selecciona al menos una página'
+            : `Extraer ${selectedPages.size} página${selectedPages.size > 1 ? 's' : ''} seleccionada${selectedPages.size > 1 ? 's' : ''}`}
+        </Button>
+      )}
+    </>
+  )}
         <input id="fi" type="file" accept=".pdf" onChange={(e) => addFile(e.target.files[0])} style={{ display: 'none' }}/>
 
         <style>{`

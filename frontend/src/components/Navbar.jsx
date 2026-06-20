@@ -265,12 +265,12 @@ function Navbar() {
                 fontFamily: '"Lato", sans-serif',
                 fontWeight: 700, fontSize: 13.5,
                 color: '#c4b5fd', background: 'transparent',
-                border: '1.5px solid rgba(167,139,250,.5)',
+                border: '1.5px solid rgba(167,139,250)',
                 borderRadius: 999, padding: '7px 18px',
                 cursor: 'pointer', letterSpacing: '.02em',
                 transition: 'all .22s ease', whiteSpace: 'nowrap', flexShrink: 0,
               }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(139,92,246,.2)'; e.currentTarget.style.borderColor = 'transparent'; e.currentTarget.style.color = 'white' }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'var(--purple-medium)'; e.currentTarget.style.borderColor = 'transparent'; e.currentTarget.style.color = 'white' }}
               onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'rgba(167,139,250,.5)'; e.currentTarget.style.color = '#c4b5fd' }}
             >
               Iniciar sesión

@@ -1,12 +1,10 @@
 import React, { useState } from 'react'
-import { Upload, X, Download, AlertCircle, Zap } from 'lucide-react'
+import { Upload, X, AlertCircle, Zap, Gauge, Scale, Sparkles } from 'lucide-react'
 import axios from 'axios'
-import { useNavigate } from 'react-router-dom'
-
+import Button from '../components/ButtonDownload'
 const COMPRESS_API = 'http://localhost:8000/api/compress'
 
 export default function CompressPDF() {
-  const navigate = useNavigate()
   const [file, setFile] = useState(null)
   const [dragActive, setDragActive] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -58,7 +56,6 @@ export default function CompressPDF() {
     setFile(null)
     setOriginalSize(null)
     setError('')
-    setSuccessMessage('')
   }
 
   const handleCompress = async () => {
@@ -82,11 +79,9 @@ export default function CompressPDF() {
         responseType: 'blob',
       })
 
-      // Calcular reducción de tamaño
       const compressedSize = response.data.size
       const reduction = Math.round(((originalSize - compressedSize) / originalSize) * 100)
 
-      // Descargar el archivo
       const url = window.URL.createObjectURL(new Blob([response.data]))
       const link = document.createElement('a')
       link.href = url
@@ -99,6 +94,7 @@ export default function CompressPDF() {
       setSuccessMessage(
         `✓ PDF comprimido exitosamente! (${reduction}% de reducción)`
       )
+      setTimeout(() => setSuccessMessage(''), 4000)
       removeFile()
     } catch (err) {
       setError(err.response?.data?.detail || 'Error al comprimir el PDF')
@@ -120,26 +116,25 @@ export default function CompressPDF() {
       value: 'low',
       label: 'Máxima compresión',
       desc: 'Menor tamaño, calidad reducida',
-      icon: '⚡',
+      Icon: Gauge,
     },
     {
       value: 'medium',
       label: 'Balanceado',
       desc: 'Equilibrio entre tamaño y calidad',
-      icon: '⚖️',
+      Icon: Scale,
     },
     {
       value: 'high',
       label: 'Alta calidad',
       desc: 'Mínima compresión, mejor calidad',
-      icon: '✨',
+      Icon: Sparkles,
     },
   ]
 
   return (
     <div style={{ minHeight: '100vh', padding: '2rem' }}>
       <div style={{ maxWidth: 800, margin: '0 auto' }}>
-        {/* Header */}
 
         <h1 style={{
           fontFamily: '"Akt", sans-serif',
@@ -261,48 +256,69 @@ export default function CompressPDF() {
               }}>
                 Nivel de compresión:
               </p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {qualityOptions.map((option) => (
-                  <button
-                    key={option.value}
-                    onClick={() => setQuality(option.value)}
-                    style={{
-                      padding: 16,
-                      background: quality === option.value ? 'rgba(216,180,254,.15)' : 'rgba(255,255,255,.05)',
-                      border: `2px solid ${quality === option.value ? 'rgba(216,180,254,.4)' : 'rgba(255,255,255,.1)'}`,
-                      borderRadius: 8,
-                      cursor: 'pointer',
-                      textAlign: 'left',
-                      transition: 'all .2s ease',
-                    }}
-                  >
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 12,
-                    }}>
-                      <span style={{ fontSize: 24 }}>{option.icon}</span>
-                      <div>
-                        <p style={{
-                          fontSize: 14,
-                          fontWeight: 600,
-                          color: quality === option.value ? '#d8b4fe' : '#fff',
-                          margin: 0,
-                        }}>
-                          {option.label}
-                        </p>
-                        <p style={{
-                          fontSize: 12,
-                          color: 'rgba(255,255,255,.6)',
-                          margin: '4px 0 0',
-                        }}>
-                          {option.desc}
-                        </p>
+
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(3, 1fr)',
+                gap: 10,
+              }}>
+                {qualityOptions.map((option) => {
+                  const isActive = quality === option.value
+                  return (
+                    <button
+                      key={option.value}
+                      onClick={() => setQuality(option.value)}
+                      style={{
+                        padding: '16px 10px',
+                        background: isActive ? 'rgba(216,180,254,.15)' : 'rgba(255,255,255,.05)',
+                        border: `2px solid ${isActive ? 'rgba(216,180,254,.4)' : 'rgba(255,255,255,.1)'}`,
+                        borderRadius: 10,
+                        cursor: 'pointer',
+                        textAlign: 'center',
+                        transition: 'all .2s ease',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: 8,
+                      }}
+                    >
+                      <div style={{
+                        width: 38, height: 38, borderRadius: 10,
+                        flexShrink: 0,
+                        background: isActive ? 'rgba(216,180,254,.18)' : 'rgba(255,255,255,.06)',
+                        border: `1px solid ${isActive ? 'rgba(216,180,254,.4)' : 'rgba(255,255,255,.1)'}`,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      }}>
+                        <option.Icon
+                          size={18}
+                          color={isActive ? '#d8b4fe' : 'rgba(255,255,255,.55)'}
+                          strokeWidth={2}
+                        />
                       </div>
-                    </div>
-                  </button>
-                ))}
+                      <p style={{
+                        fontSize: 13,
+                        fontWeight: 600,
+                        color: isActive ? '#d8b4fe' : '#fff',
+                        margin: 0,
+                        lineHeight: 1.3,
+                      }}>
+                        {option.label}
+                      </p>
+                    </button>
+                  )
+                })}
               </div>
+
+              {/* Descripción dinámica de la opción seleccionada */}
+              <p style={{
+                fontSize: 14.5,
+                color: 'rgba(255, 255, 255)',
+                margin: '12px 2px 0',
+                textAlign: 'center',
+                transition: 'opacity .15s ease',
+              }}>
+                {qualityOptions.find(o => o.value === quality)?.desc}
+              </p>
             </div>
           </>
         )}
@@ -342,48 +358,15 @@ export default function CompressPDF() {
 
         {/* Compress Button */}
         {file && (
-          <button
-            onClick={handleCompress}
-            disabled={loading}
-            style={{
-              width: '100%',
-              padding: '14px 24px',
-              background: loading ? 'rgba(216,180,254,.3)' : 'linear-gradient(135deg, #d8b4fe, #c084fc)',
-              border: 'none',
-              color: '#000',
-              fontSize: 15,
-              fontWeight: 600,
-              borderRadius: 8,
-              cursor: loading ? 'not-allowed' : 'pointer',
-              transition: 'all .3s ease',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 8,
-              opacity: loading ? 0.7 : 1,
-            }}
-          >
-            {loading ? (
-              <>
-                <div style={{
-                  width: 16,
-                  height: 16,
-                  border: '2px solid rgba(0,0,0,.3)',
-                  borderTop: '2px solid #000',
-                  borderRadius: '50%',
-                  animation: 'spin 0.8s linear infinite',
-                }} />
-                Comprimiendo...
-              </>
-            ) : (
-              <>
-                <Zap size={18} />
-                Comprimir PDF
-              </>
-            )}
-          </button>
+       <Button 
+        onClick={handleCompress} 
+        loading={loading}
+        icon={Zap}
+        sticky
+         >
+          Comprimir PDF
+        </Button>
         )}
-
         <input
           id="fileInput"
           type="file"

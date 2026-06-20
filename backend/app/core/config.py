@@ -3,6 +3,8 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     app_name: str = "NeatPDF"
     max_file_size_mb: int = 50
+    google_client_id: str
+    google_client_secret: str
     allowed_origins: list[str] = [
         "http://localhost:3000",
         "http://localhost:5173",

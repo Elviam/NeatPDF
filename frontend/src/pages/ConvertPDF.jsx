@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Upload, X, Download, AlertCircle, Image as ImageIcon } from 'lucide-react'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
+import Button from '../components/ButtonDownload'
 
 const CONVERT_API = 'http://localhost:8000/api/convert'
 
@@ -56,7 +57,6 @@ export default function ConvertPDF() {
   const removeFile = () => {
     setFile(null)
     setError('')
-    setSuccessMessage('')
   }
 
   const handleConvert = async () => {
@@ -92,6 +92,7 @@ export default function ConvertPDF() {
       window.URL.revokeObjectURL(url)
 
       setSuccessMessage(`✓ PDF convertido a ${format.toUpperCase()} exitosamente!`)
+      setTimeout(() => setSuccessMessage(''), 4000) 
       removeFile()
     } catch (err) {
       setError(err.response?.data?.detail || 'Error al convertir el PDF')
@@ -405,46 +406,14 @@ export default function ConvertPDF() {
 
         {/* Convert Button */}
         {file && (
-          <button
-            onClick={handleConvert}
-            disabled={loading}
-            style={{
-              width: '100%',
-              padding: '14px 24px',
-              background: loading ? 'rgba(165,243,252,.3)' : 'linear-gradient(135deg, #a5f3fc, #67e8f9)',
-              border: 'none',
-              color: '#000',
-              fontSize: 15,
-              fontWeight: 600,
-              borderRadius: 8,
-              cursor: loading ? 'not-allowed' : 'pointer',
-              transition: 'all .3s ease',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 8,
-              opacity: loading ? 0.7 : 1,
-            }}
+         <Button 
+         onClick={handleConvert} 
+         loading={loading}
+         icon={ImageIcon}
+         sticky
           >
-            {loading ? (
-              <>
-                <div style={{
-                  width: 16,
-                  height: 16,
-                  border: '2px solid rgba(0,0,0,.3)',
-                  borderTop: '2px solid #000',
-                  borderRadius: '50%',
-                  animation: 'spin 0.8s linear infinite',
-                }} />
-                Convirtiendo...
-              </>
-            ) : (
-              <>
-                <ImageIcon size={18} />
-                Convertir a {format.toUpperCase()}
-              </>
-            )}
-          </button>
+          Convertir a {format.toUpperCase()}
+         </Button> 
         )}
 
         <input

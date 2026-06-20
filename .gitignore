@@ -8,3 +8,6 @@ __pycache__/
 dist/
 build/
 **/node_modules/
+backend/.env
+frontend/.env
+backend/storage/

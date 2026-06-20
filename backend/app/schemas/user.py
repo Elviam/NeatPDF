@@ -1,18 +1,18 @@
 from pydantic import BaseModel, EmailStr
+from typing import Optional
 
 
 class UserCreate(BaseModel):
-    """Datos recibidos al registrar un usuario."""
     email: EmailStr
     password: str
-    full_name: str | None = None
+    full_name: Optional[str] = None
 
 
 class UserOut(BaseModel):
-    """Datos del usuario que se devuelven al frontend (sin password)."""
     id: int
     email: EmailStr
-    full_name: str | None = None
+    full_name: Optional[str] = None
+    avatar_url: Optional[str] = None
 
     class Config:
         from_attributes = True
