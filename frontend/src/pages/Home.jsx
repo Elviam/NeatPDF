@@ -2,6 +2,7 @@ import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import Footer from '../components/Footer'
 import HeroAnimation from '../components/HeroAnimation'
+import { FilePlus2, Scissors, Minimize2, Image } from 'lucide-react'
 
 /* ==== ESTILOS GLOBALES ==== */
 const styles = `
@@ -149,25 +150,11 @@ function InjectStyles() {
   return <style dangerouslySetInnerHTML={{ __html: styles }} />
 }
 
-/* ==== Iconos de las tarjetas ==== */
-function IconMerge({ color, size = 32 }) {
-  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="6" width="13" height="16" rx="2"/><rect x="8" y="2" width="13" height="16" rx="2"/></svg>
-}
-function IconSplit({ color, size = 32 }) {
-  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>
-}
-function IconCompress({ color, size = 32 }) {
-  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M4 14h6v6"/><path d="M20 10h-6V4"/><path d="M14 10 21 3"/><path d="M3 21l7-7"/></svg>
-}
-function IconConvert({ color, size = 32 }) {
-  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 0 1-9 9 9 9 0 0 1-6.74-3.04L3 16"/><path d="M3 12a9 9 0 0 1 9-9 9 9 0 0 1 6.74 3.04L21 8"/><path d="M3 16v4h4"/><path d="M21 8V4h-4"/></svg>
-}
-
 const tools = [
-  { id: 'merge',    title: 'Unir PDF',      desc: 'Une varios archivos PDF en uno solo.',          accent: '#6ee7b7', Icon: IconMerge },
-  { id: 'split',    title: 'Separar PDF',   desc: 'Separa las páginas en archivos individuales.',  accent: '#93c5fd', Icon: IconSplit },
-  { id: 'compress', title: 'Comprimir PDF', desc: 'Reduce el tamaño sin perder calidad.',           accent: '#d8b4fe', Icon: IconCompress },
-  { id: 'convert',  title: 'PDF a Imagen',  desc: 'Convierte páginas a PNG o JPG.',                accent: '#a5f3fc', Icon: IconConvert },
+  { id: 'merge',    title: 'Unir PDF',      desc: 'Une varios archivos PDF en uno solo.',          accent: '#6ee7b7', Icon: FilePlus2 },
+  { id: 'split',    title: 'Separar PDF',   desc: 'Separa las páginas en archivos individuales.',  accent: '#93c5fd', Icon: Scissors },
+  { id: 'compress', title: 'Comprimir PDF', desc: 'Reduce el tamaño sin perder calidad.',           accent: '#d8b4fe', Icon: Minimize2 },
+  { id: 'convert',  title: 'PDF a Imagen',  desc: 'Convierte páginas a PNG o JPG.',                accent: '#a5f3fc', Icon: Image },
 ]
 
 /* ==== Tool Card ==== */

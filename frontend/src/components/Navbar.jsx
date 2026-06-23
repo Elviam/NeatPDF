@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext'
 import LoginModal from './LoginModal'
 import logo from '../assets/logo.png'
 
-const INNER_ROUTES = ['/merge', '/split', '/compress', '/convert', '/documents']
+const INNER_ROUTES = ['/merge', '/split', '/compress', '/convert', '/documents', '/faq', '/privacy', '/terms', '/how-to-use']
 
 function Navbar() {
   const [modalOpen,    setModalOpen]    = useState(false)

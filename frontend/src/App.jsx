@@ -7,6 +7,10 @@ import ConvertPDF from './pages/ConvertPDF'
 import Navbar from './components/Navbar'
 import MyDocuments from './pages/MyDocuments'
 import ScrollToTop from './components/ScrollToTop'
+import FAQ     from './pages/FAQ'
+import Privacy from './pages/Privacy'
+import Terms   from './pages/Terms'
+import HowToUse from './pages/HowToUse'
 
 function App() {
   return (
@@ -21,6 +25,10 @@ function App() {
           <Route path="/compress" element={<CompressPDF />} />
           <Route path="/convert" element={<ConvertPDF />} />
           <Route path="/documents" element={<MyDocuments />} />
+          <Route path="/faq"     element={<FAQ />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms"   element={<Terms />} />     
+          <Route path="/how-to-use" element={<HowToUse />} />
         </Routes>
       </div>
     </BrowserRouter>

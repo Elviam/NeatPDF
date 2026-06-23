@@ -528,8 +528,6 @@ export default function SplitPDF() {
   }
   const fmt = (b) => { if (!b) return '0 B'; const k = 1024, s = ['B', 'KB', 'MB']; const i = Math.floor(Math.log(b) / Math.log(k)); return Math.round(b / Math.pow(k, i) * 100) / 100 + ' ' + s[i] }
 
-  // Altura del contenedor de la galería: exactamente 2 filas + gap + padding del contenedor.
-  // Si aún no se ha medido (primer render), usamos un fallback razonable.
   const galleryMaxHeight = galleryRowHeight
     ? Math.ceil(galleryRowHeight * 3 + 24 /* gap entre filas */ + 32 /* padding del contenedor */)
     : 380
