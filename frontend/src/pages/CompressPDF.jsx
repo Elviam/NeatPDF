@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { Upload, X, AlertCircle, Zap, Gauge, Scale, Sparkles } from 'lucide-react'
 import axios from 'axios'
 import Button from '../components/ButtonDownload'
-const COMPRESS_API = 'http://localhost:8000/api/compress'
+const COMPRESS_API = `${import.meta.env.VITE_API_URL}/api/compress`
 
 export default function CompressPDF() {
   const [file, setFile] = useState(null)

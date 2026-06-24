@@ -8,9 +8,9 @@ import Button from '../components/ButtonDownload';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker
 
-const SPLIT_ALL_API   = 'http://localhost:8000/api/split/all'
-const SPLIT_RANGE_API = 'http://localhost:8000/api/split/range'
-const MERGE_API = 'http://localhost:8000/api/merge/'
+const SPLIT_ALL_API   = `${import.meta.env.VITE_API_URL}/api/split/all`
+const SPLIT_RANGE_API = `${import.meta.env.VITE_API_URL}/api/split/range`
+const MERGE_API = `${import.meta.env.VITE_API_URL}/api/merge/`
 
 /* paleta de colores por índice de rango */
 const RANGE_COLORS = [

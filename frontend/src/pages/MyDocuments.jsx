@@ -7,7 +7,7 @@ import {
 import axios from 'axios'
 import { useAuth } from '../context/AuthContext'
 
-const DOCS_API = 'http://localhost:8000/api/documents'
+const DOCS_API = `${import.meta.env.VITE_API_URL}/api/documents`
 
 const TOOL_LABELS = {
   merge:    'Unir PDF',

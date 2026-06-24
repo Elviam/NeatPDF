@@ -7,7 +7,7 @@ import Button from '../components/ButtonDownload'
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker
 
-const MERGE_API = 'http://localhost:8000/api/merge'
+const MERGE_API = `${import.meta.env.VITE_API_URL}/api/merge`
 
 function FileThumbnail({ file, size = 56 }) {
   const canvasRef = useRef(null)

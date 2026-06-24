@@ -4,7 +4,7 @@ import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
 import Button from '../components/ButtonDownload'
 
-const CONVERT_API = 'http://localhost:8000/api/convert'
+const CONVERT_API = `${import.meta.env.VITE_API_URL}/api/convert`
 
 export default function ConvertPDF() {
   const navigate = useNavigate()
