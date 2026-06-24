@@ -1,99 +1,181 @@
-# 📂 NeatPDF - Frontend
-
-Una aplicación web moderna, rápida y segura diseñada para manipular archivos PDF directamente desde el navegador. **NeatPDF** prioriza la experiencia de usuario con una interfaz limpia, animaciones fluidas y procesamiento eficiente para garantizar la privacidad y comodidad del usuario.
-
+<div align="center">
+<img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black" />
+<img src="https://img.shields.io/badge/Vite-8-646CFF?style=for-the-badge&logo=vite&logoColor=white" />
+<img src="https://img.shields.io/badge/TailwindCSS-4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" />
+<img src="https://img.shields.io/badge/JavaScript-ES2024-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" />
+# NeatPDF — Frontend
+ 
+**Herramientas PDF directo en tu navegador. Rápido, limpio y sin complicaciones.**
+ 
+[Ver demo en vivo](https://neatpdf.vercel.app) · [Repositorio backend](../backend/README.md) · [Reportar un bug](https://github.com/Elviam/NeatPDF/issues)
+ 
+</div>
 ---
-
-## 🚀 Características Principales
-
-* **Unir PDF:** Combina múltiples archivos PDF en un solo documento en el orden exacto que decida el usuario.
-* **Separar PDF:** Divide las páginas de un archivo PDF y las descarga agrupadas de forma inteligente, con previsualización en tiempo real de cada rango seleccionado.
-* **Arrastrar y Soltar:** Zona de carga intuitiva para interactuar con los archivos de manera natural.
-* **Comprimir PDF** *(próximamente):* Optimiza y reduce el peso de los archivos para compartirlos más fácilmente.
-* **PDF a Imagen** *(próximamente):* Transforma páginas de documentos PDF a formatos de imagen independientes (PNG/JPG).
-
+ 
+## ¿Qué es NeatPDF?
+ 
+NeatPDF es una aplicación web fullstack para manipular archivos PDF. Este repositorio contiene el **frontend**: una SPA construida con React 19 y Vite que se comunica con una API FastAPI para el procesamiento en el servidor.
+ 
+El proyecto nació como portafolio para demostrar habilidades fullstack reales: autenticación con JWT y OAuth, diseño con sistema visual propio, y gestión de archivos binarios en el navegador.
+ 
 ---
-
-## 🛠️ Stack Tecnológico y Dependencias
-
-El núcleo del frontend está construido sobre el ecosistema de **React 19** y **Vite 8**, utilizando las siguientes librerías clave para su funcionamiento:
-
-### Procesamiento y Manipulación de Archivos
-* **`pdfjs-dist` (PDF.js):** Motor de Mozilla utilizado para renderizar, leer y generar previsualizaciones de las páginas de los archivos PDF en el cliente.
-* **`jszip`:** Encargada de empaquetar y comprimir múltiples archivos resultantes en un único `.zip` descargable, evitando saturar las descargas del usuario.
-* **`react-dropzone`:** Gestión y validación de la zona interactiva de arrastre (*drag and drop*) para la carga de archivos.
-
-### Interfaz de Usuario y Estilos
-* **`tailwindcss` v4.0:** Framework de CSS utilizado junto con su plugin oficial para Vite, permitiendo un diseño responsivo, moderno y de alto rendimiento.
-* **`lucide-react`:** Set de iconos vectoriales limpios y consistentes utilizados en toda la interfaz de la aplicación.
-* **`react-router-dom` v7:** Sistema de enrutamiento dinámico para navegar entre la página de inicio y las diferentes herramientas PDF sin recargar el navegador.
-
-### Comunicación y Core
-* **`axios`:** Cliente HTTP utilizado para gestionar las peticiones y la comunicación asíncrona con la API del backend.
-
+ 
+## Funcionalidades
+ 
+| Herramienta | Descripción | Estado |
+|---|---|---|
+| **Unir PDF** | Combina múltiples archivos en uno, con reordenamiento drag & drop y previsualización de páginas | ✅ Disponible |
+| **Separar PDF** | Extrae rangos de páginas con previsualización en tiempo real | ✅ Disponible |
+| **Comprimir PDF** | Reduce el peso del archivo sin pérdida visible de calidad | ✅ Disponible |
+| **PDF a Imagen** | Convierte páginas a PNG/JPG descargables | ✅ Disponible |
+| **Mis documentos** | Historial de archivos procesados con búsqueda, filtros y favoritos | ✅ Disponible |
+| **Autenticación** | Registro, login con JWT y acceso rápido con Google OAuth | ✅ Disponible |
+ 
 ---
-
-## 💻 Instalación y Uso Local
-
-Sigue estos pasos para clonar el repositorio y ejecutar el entorno de desarrollo en tu máquina local.
-
-### Prerrequisitos
-Asegúrate de tener instalado [Node.js](https://nodejs.org/) (versión LTS recomendada) y npm.
-
-> ⚠️ **Nota:** Algunas herramientas de NeatPDF requieren que el backend (FastAPI) esté corriendo para procesar los archivos. Consulta el README del backend para las instrucciones de instalación y ejecución con `uvicorn`.
-
-### Pasos de Configuración
-
-1. **Clonar el repositorio e ingresar a la carpeta del proyecto:**
-```bash
-git clone https://github.com/Elviam/NeatPDF.git
-cd NeatPDF/frontend
-```
-
-2. **Instalar todas las dependencias del proyecto:**
-```bash
-npm install
-```
-
-3. **Iniciar el servidor de desarrollo local:**
-```bash
-npm run dev
-```
-
-4. **Abrir la aplicación:**
-
-Una vez iniciado el servidor, abre tu navegador y visita la URL indicada en la terminal (por defecto `http://localhost:5173`).
-
+ 
+## Stack tecnológico
+ 
+### Core
+- **React 19** — UI declarativa con los últimos hooks y concurrent features
+- **Vite 8** — Build tool con HMR ultrarrápido y bundle optimizado con Rolldown
+- **React Router v7** — Enrutamiento client-side con layouts anidados
+### Estilos
+- **Tailwind CSS v4** — Utility-first con el nuevo motor Oxide (sin archivo de config)
+- Diseño glassmorphism con paleta propia: morados, azules y verde menta
+### Archivos PDF
+- **pdfjs-dist** — Renderizado y generación de miniaturas de páginas en el cliente
+- **jszip** — Empaqueta múltiples archivos de salida en un `.zip` descargable
+- **react-dropzone** — Zona drag & drop con validación de tipo y tamaño
+### Comunicación
+- **Axios** — Cliente HTTP con interceptores para adjuntar el token JWT automáticamente
+- **@react-oauth/google** — Integración Google OAuth 2.0 sin dependencias pesadas
 ---
-
-## 📦 Build de Producción
-
-Para generar una versión optimizada y lista para despliegue:
-
-```bash
-npm run build
-```
-
-Los archivos resultantes se generarán en la carpeta `dist/`, listos para ser servidos por cualquier hosting de archivos estáticos.
-
-Para previsualizar la build de producción localmente:
-
-```bash
-npm run preview
-```
-
----
-
-## 📁 Estructura del Proyecto
-
+ 
+## Arquitectura de carpetas
+ 
 ```
 frontend/
+├── public/
+│   └── vite.svg
 ├── src/
-│   ├── components/    # Componentes reutilizables de la interfaz
-│   ├── pages/          # Páginas principales (Home, MergePDF, SplitPDF, etc.)
-│   ├── App.jsx         # Configuración de rutas
-│   └── main.jsx        # Punto de entrada de la aplicación
-├── public/             # Recursos estáticos
+│   ├── components/
+│   │   ├── Navbar.jsx            # Barra de navegación con avatar, dropdown y botón de retroceso
+│   │   ├── Footer.jsx            # Footer con enlaces a páginas legales
+│   │   ├── HeroAnimation.jsx     # Animación de fondo del Home
+│   │   ├── ScrollToTop.jsx       # Resetea scroll en cambio de ruta
+│   │   └── ProtectedRoute.jsx    # HOC para rutas que requieren autenticación
+│   ├── pages/
+│   │   ├── Home.jsx              # Landing con animación y cards de herramientas
+│   │   ├── MergePDF.jsx          # Herramienta: unir PDFs con miniaturas
+│   │   ├── SplitPDF.jsx          # Herramienta: separar páginas
+│   │   ├── CompressPDF.jsx       # Herramienta: comprimir PDF
+│   │   ├── ConvertToImage.jsx    # Herramienta: PDF a imagen
+│   │   ├── MyDocuments.jsx       # Historial de documentos del usuario
+│   │   ├── Login.jsx             # Formulario de acceso
+│   │   ├── Register.jsx          # Formulario de registro
+│   │   └── legal/                # HowToUse, FAQ, Privacy, Terms
+│   ├── context/
+│   │   └── AuthContext.jsx       # Estado global de autenticación (token, usuario)
+│   ├── api/
+│   │   └── axios.js              # Instancia de Axios con baseURL y token automático
+│   ├── App.jsx                   # Definición de rutas
+│   └── main.jsx                  # Punto de entrada, GoogleOAuthProvider
+├── .env                          # Variables de entorno locales (no versionado)
+├── .env.example                  # Plantilla de variables requeridas
 ├── package.json
 └── vite.config.js
 ```
+ 
+---
+ 
+## Instalación y uso local
+ 
+### Requisitos previos
+ 
+- Node.js 20 LTS o superior
+- El [backend de NeatPDF](../backend/README.md) corriendo en `http://localhost:8000`
+### Variables de entorno
+ 
+Copia el archivo de ejemplo y completa los valores:
+ 
+```bash
+cp .env.example .env
+```
+ 
+```env
+# .env
+VITE_API_URL=http://localhost:8000
+VITE_GOOGLE_CLIENT_ID=tu_google_client_id_aqui
+```
+ 
+Para obtener un Google Client ID, crea un proyecto en [Google Cloud Console](https://console.cloud.google.com/) y configura las credenciales OAuth 2.0 con `http://localhost:5173` como origen autorizado.
+ 
+### Pasos
+ 
+```bash
+# 1. Instalar dependencias
+npm install
+ 
+# 2. Iniciar servidor de desarrollo
+npm run dev
+```
+ 
+La app estará disponible en `http://localhost:5173`.
+ 
+---
+ 
+## Scripts disponibles
+ 
+```bash
+npm run dev        # Servidor de desarrollo con HMR
+npm run build      # Build de producción (salida en /dist)
+npm run preview    # Previsualiza el build de producción localmente
+npm run lint       # Análisis estático con ESLint
+```
+ 
+---
+ 
+## Decisiones técnicas destacadas
+ 
+**Portal para el botón de descarga fija**
+El botón de descarga flotante que aparece tras procesar un archivo usa `ReactDOM.createPortal` anclado a `document.body`. Esto evita que un ancestro con `transform` o `z-index` rompa el posicionamiento `fixed`.
+ 
+**Miniaturas de páginas con PDF.js**
+En la herramienta de merge, cada página del PDF se renderiza como thumbnail en un `<canvas>` usando `pdfjs-dist`, sin enviar el archivo al servidor. Esto mejora la privacidad y reduce la latencia.
+ 
+**Interceptor de Axios para JWT**
+En lugar de pasar el token manualmente en cada petición, un interceptor de request lo adjunta automáticamente desde `localStorage` si existe.
+ 
+**Google OAuth con componente `<GoogleLogin>`**
+Se usa el componente de renderizado de `@react-oauth/google` en lugar del hook `useGoogleLogin` para evitar violaciones del orden de hooks cuando hay renders condicionales.
+ 
+---
+ 
+## Despliegue
+ 
+El frontend está pensado para desplegarse en **Vercel** apuntando a la rama `main`.
+ 
+```bash
+# Build de producción
+npm run build
+# Los archivos estáticos quedan en /dist, listos para cualquier CDN
+```
+ 
+Variables de entorno requeridas en Vercel:
+ 
+```
+VITE_API_URL=https://tu-backend.onrender.com
+VITE_GOOGLE_CLIENT_ID=tu_google_client_id_produccion
+```
+ 
+---
+ 
+## Capturas de pantalla
+ 
+> 📸 *Próximamente — el proyecto está en fase de despliegue.*
+ 
+---
+ 
+## Licencia
+ 
+MIT © 2026 Elvia — Proyecto de portafolio profesional.
