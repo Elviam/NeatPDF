@@ -1,13 +1,13 @@
 <div align="center">
 <img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black" />
 <img src="https://img.shields.io/badge/Vite-8-646CFF?style=for-the-badge&logo=vite&logoColor=white" />
-<img src="https://img.shields.io/badge/TailwindCSS-4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" />
+<img src="https://img.shields.io/badge/CSS3-Variables_%26_Glassmorphism-1572B6?style=for-the-badge&logo=css3&logoColor=white" />
 <img src="https://img.shields.io/badge/JavaScript-ES2024-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" />
 # NeatPDF — Frontend
  
 **Herramientas PDF directo en tu navegador. Rápido, limpio y sin complicaciones.**
  
-[Ver demo en vivo](https://neatpdf.vercel.app) · [Repositorio backend](../backend/README.md) · [Reportar un bug](https://github.com/Elviam/NeatPDF/issues)
+[Ver demo en vivo](https://neat-pdf-eta.vercel.app) · [Repositorio backend](../backend/README.md) · [Reportar un bug](https://github.com/Elviam/NeatPDF/issues)
  
 </div>
 ---
@@ -40,8 +40,7 @@ El proyecto nació como portafolio para demostrar habilidades fullstack reales: 
 - **Vite 8** — Build tool con HMR ultrarrápido y bundle optimizado con Rolldown
 - **React Router v7** — Enrutamiento client-side con layouts anidados
 ### Estilos
-- **Tailwind CSS v4** — Utility-first con el nuevo motor Oxide (sin archivo de config)
-- Diseño glassmorphism con paleta propia: morados, azules y verde menta
+- **CSS3 + Tailwind CSS v4** — Sistema de diseño basado en CSS custom properties (--purple, --teal). Tailwind se usa como base de reset y utilities puntuales; el sistema visual glassmorphism se implementa con variables y estilos inline en los componentes.
 ### Archivos PDF
 - **pdfjs-dist** — Renderizado y generación de miniaturas de páginas en el cliente
 - **jszip** — Empaqueta múltiples archivos de salida en un `.zip` descargable
@@ -172,10 +171,34 @@ VITE_GOOGLE_CLIENT_ID=tu_google_client_id_produccion
  
 ## Capturas de pantalla
  
-> 📸 *Próximamente — el proyecto está en fase de despliegue.*
- 
+## Capturas de pantalla
+
+### Home
+![Hero](../docs/screenshots/home-hero.png)
+![Herramientas](../docs/screenshots/home-tools.png)
+
+### Separar PDFs
+![Split PDF](../docs/screenshots/split.png)
+
+### Mis documentos
+![Mis documentos](../docs/screenshots/documents.png)
+
+| Login | Mobile |
+|---|---|
+| ![Login](../docs/screenshots/login.png) | ![Mobile](../docs/screenshots/mobile.png) |
 ---
- 
+## Docker
+
+Para correr el frontend en un contenedor junto con el backend:
+
+```bash
+# Desde la raíz del proyecto
+docker compose up --build
+```
+
+El frontend se sirve con nginx en `http://localhost`.
+La variable `VITE_API_URL` se inyecta en build time desde el `docker-compose.yml`.
+---
 ## Licencia
  
 MIT © 2026 Elvia — Proyecto de portafolio profesional.

@@ -241,7 +241,15 @@ alembic downgrade -1
 > ⚠️ El plan gratuito de Render tiene un **cold start de ~30 segundos** tras 15 minutos de inactividad. Es aceptable para demos de portafolio.
 
 ---
+## Docker
 
+Levanta el backend junto con el frontend con un solo comando desde la raíz del proyecto:
+
+```bash
+docker compose up --build
+```
+Ver [docker-compose.yml](../docker-compose.yml) en la raíz del repositorio.
+---
 ## Licencia
 
 MIT © 2026 Elvia — Proyecto de portafolio académico y profesional.
