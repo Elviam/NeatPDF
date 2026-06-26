@@ -196,19 +196,6 @@ export default function Footer() {
             <span style={{ fontSize: 12, color: 'rgba(255,255,255,.25)' }}>
               © 2026 NeatPDF
             </span>
-            <span style={{ fontSize: 12, color: 'rgba(255,255,255,.18)' }}>
-              Hecho con ♥ por{' '}
-              <a 
-                href="https://www.linkedin.com/in/elvia-guti%C3%A9rrez-85b139352"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ color: 'rgba(255,255,255,.25)', textDecoration: 'none', transition: 'color .18s' }}
-                onMouseEnter={(e) => e.currentTarget.style.color = 'rgba(255,255,255,.5)'}
-                onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255,255,255,.25)'}
-              >
-                Elvia
-              </a>
-            </span>
           </div>
 
         </div>

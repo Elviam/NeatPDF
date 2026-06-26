@@ -486,6 +486,7 @@ export default function SplitPDF() {
         ? `✓ Páginas ${results[0].range.start}–${results[0].range.end} extraídas exitosamente!`
         : `✓ ${results.length} rangos extraídos y empaquetados!`
       )
+      setTimeout(() => setSuccess(''), 4000)
       removeFile()
     } catch (e) {
       setError(e.response?.data?.detail || 'Error al extraer rangos')
@@ -574,7 +575,7 @@ export default function SplitPDF() {
                 <p style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,.7)', marginBottom: 10 }}>¿Cómo quieres separar?</p>
                 <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
                   {[
-                    ['all',   'Todas las páginas'],
+                    ['all',   'Un PDF por página'],
                     ['range', 'Por rango'],
                     ['pages', 'Páginas específicas'],
                   ].map(([m, l]) => (

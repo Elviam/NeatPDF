@@ -11,7 +11,7 @@ const MERGE_API = `${import.meta.env.VITE_API_URL}/api/merge`
 
 function FileThumbnail({ file, size = 56 }) {
   const canvasRef = useRef(null)
-  const [status, setStatus] = useState('loading') // 'loading' | 'ready' | 'error'
+  const [status, setStatus] = useState('loading')
 
   useEffect(() => {
     let cancelled = false
@@ -27,9 +27,6 @@ function FileThumbnail({ file, size = 56 }) {
         if (cancelled) return
 
         const viewport = page.getViewport({ scale: 1 })
-        // Renderizamos a una resolución mayor que el contenedor visible
-        // para que el recorte (object-fit: cover vía canvas centrado)
-        // se vea nítido en pantallas de alta densidad.
         const renderScale = (size * 2) / Math.min(viewport.width, viewport.height)
         const scaledViewport = page.getViewport({ scale: renderScale })
 
@@ -88,7 +85,15 @@ export default function MergePDF() {
   const [error, setError] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
   const [draggedIndex, setDraggedIndex] = useState(null)
-  const [confirmDelete, setConfirmDelete] = useState(null) // fileObj a eliminar o null
+  const [confirmDelete, setConfirmDelete] = useState(null)
+
+  // Touch drag state
+  const touchDragIndex = useRef(null)
+  const touchCloneRef = useRef(null)
+  const touchStartY = useRef(0)
+  const touchLastY = useRef(0)
+  const itemRectsRef = useRef([])
+  const listRef = useRef(null)
 
   const handleDrag = (e) => {
     e.preventDefault()
@@ -104,14 +109,11 @@ export default function MergePDF() {
     e.preventDefault()
     e.stopPropagation()
     setDragActive(false)
-
-    const droppedFiles = e.dataTransfer.files
-    addFiles(droppedFiles)
+    addFiles(e.dataTransfer.files)
   }
 
   const handleFileInput = (e) => {
-    const selectedFiles = e.target.files
-    addFiles(selectedFiles)
+    addFiles(e.target.files)
   }
 
   const addFiles = (fileList) => {
@@ -132,9 +134,7 @@ export default function MergePDF() {
     setFiles(prev => [...prev, ...newFiles])
   }
 
-  const requestRemoveFile = (fileObj) => {
-    setConfirmDelete(fileObj)
-  }
+  const requestRemoveFile = (fileObj) => setConfirmDelete(fileObj)
 
   const confirmRemoveFile = () => {
     if (!confirmDelete) return
@@ -146,9 +146,7 @@ export default function MergePDF() {
     if (
       (direction === 'up' && index === 0) ||
       (direction === 'down' && index === files.length - 1)
-    ) {
-      return
-    }
+    ) return
 
     const newFiles = [...files]
     const newIndex = direction === 'up' ? index - 1 : index + 1
@@ -156,17 +154,18 @@ export default function MergePDF() {
     setFiles(newFiles)
   }
 
-  const handleDragStart = (e, index) => {
+  // Mouse drag handlers
+  const handleMouseDragStart = (e, index) => {
     setDraggedIndex(index)
     e.dataTransfer.effectAllowed = 'move'
   }
 
-  const handleDragOver = (e) => {
+  const handleMouseDragOver = (e) => {
     e.preventDefault()
     e.dataTransfer.dropEffect = 'move'
   }
 
-  const handleDropOnItem = (e, index) => {
+  const handleMouseDropOnItem = (e, index) => {
     e.preventDefault()
     if (draggedIndex === null || draggedIndex === index) return
 
@@ -175,6 +174,109 @@ export default function MergePDF() {
     newFiles.splice(draggedIndex, 1)
     newFiles.splice(index, 0, draggedFile)
     setFiles(newFiles)
+    setDraggedIndex(null)
+  }
+
+  // Touch drag handlers
+  const handleTouchStart = (e, index) => {
+    const touch = e.touches[0]
+    touchDragIndex.current = index
+    touchStartY.current = touch.clientY
+    touchLastY.current = touch.clientY
+
+    // Snapshot rects of all list items
+    if (listRef.current) {
+      const items = listRef.current.querySelectorAll('[data-file-item]')
+      itemRectsRef.current = Array.from(items).map(el => el.getBoundingClientRect())
+    }
+
+    // Create floating clone
+    const sourceEl = e.currentTarget
+    const rect = sourceEl.getBoundingClientRect()
+    const clone = sourceEl.cloneNode(true)
+    clone.style.position = 'fixed'
+    clone.style.left = rect.left + 'px'
+    clone.style.top = rect.top + 'px'
+    clone.style.width = rect.width + 'px'
+    clone.style.height = rect.height + 'px'
+    clone.style.zIndex = '9999'
+    clone.style.opacity = '0.9'
+    clone.style.pointerEvents = 'none'
+    clone.style.borderRadius = '8px'
+    clone.style.boxShadow = '0 8px 32px rgba(0,0,0,.5)'
+    clone.style.border = '1px solid rgba(110,231,183,.6)'
+    clone.style.transform = 'scale(1.02)'
+    clone.style.transition = 'none'
+    document.body.appendChild(clone)
+    touchCloneRef.current = clone
+
+    // Visual feedback on source
+    sourceEl.style.opacity = '0.3'
+  }
+
+  const handleTouchMove = (e) => {
+    if (touchDragIndex.current === null) return
+    e.preventDefault()
+
+    const touch = e.touches[0]
+    const deltaY = touch.clientY - touchLastY.current
+    touchLastY.current = touch.clientY
+
+    // Move clone
+    if (touchCloneRef.current) {
+      const currentTop = parseFloat(touchCloneRef.current.style.top) || 0
+      touchCloneRef.current.style.top = (currentTop + deltaY) + 'px'
+    }
+
+    // Determine target index based on finger position
+    const rects = itemRectsRef.current
+    let targetIndex = touchDragIndex.current
+    for (let i = 0; i < rects.length; i++) {
+      const rect = rects[i]
+      const midY = rect.top + rect.height / 2
+      if (touch.clientY < midY) {
+        targetIndex = i
+        break
+      }
+      targetIndex = i
+    }
+
+    // Live reorder preview
+    if (targetIndex !== touchDragIndex.current) {
+      setFiles(prev => {
+        const newFiles = [...prev]
+        const draggedFile = newFiles[touchDragIndex.current]
+        newFiles.splice(touchDragIndex.current, 1)
+        newFiles.splice(targetIndex, 0, draggedFile)
+        touchDragIndex.current = targetIndex
+
+        // Re-snapshot rects after reorder
+        requestAnimationFrame(() => {
+          if (listRef.current) {
+            const items = listRef.current.querySelectorAll('[data-file-item]')
+            itemRectsRef.current = Array.from(items).map(el => el.getBoundingClientRect())
+          }
+        })
+
+        return newFiles
+      })
+    }
+  }
+
+  const handleTouchEnd = (e) => {
+    // Remove clone
+    if (touchCloneRef.current) {
+      document.body.removeChild(touchCloneRef.current)
+      touchCloneRef.current = null
+    }
+
+    // Restore opacity on all items
+    if (listRef.current) {
+      const items = listRef.current.querySelectorAll('[data-file-item]')
+      items.forEach(el => { el.style.opacity = '' })
+    }
+
+    touchDragIndex.current = null
     setDraggedIndex(null)
   }
 
@@ -195,9 +297,7 @@ export default function MergePDF() {
       })
 
       const response = await axios.post(MERGE_API, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+        headers: { 'Content-Type': 'multipart/form-data' },
         responseType: 'blob',
       })
 
@@ -211,7 +311,7 @@ export default function MergePDF() {
       window.URL.revokeObjectURL(url)
 
       setSuccessMessage('✓ PDFs unidos exitosamente!')
-      setTimeout(() => setSuccessMessage(''), 4000) 
+      setTimeout(() => setSuccessMessage(''), 4000)
       setFiles([])
     } catch (err) {
       setError(err.response?.data?.detail || 'Error al unir los PDFs')
@@ -279,19 +379,10 @@ export default function MergePDF() {
                 margin: '0 auto 16px',
               }}
             />
-            <p style={{
-              fontSize: 16,
-              fontWeight: 600,
-              color: '#fff',
-              margin: '0 0 8px',
-            }}>
+            <p style={{ fontSize: 16, fontWeight: 600, color: '#fff', margin: '0 0 8px' }}>
               Arrastra tus PDFs aquí
             </p>
-            <p style={{
-              fontSize: 13,
-              color: 'rgba(255,255,255,.6)',
-              margin: 0,
-            }}>
+            <p style={{ fontSize: 13, color: 'rgba(255,255,255,.6)', margin: 0 }}>
               o haz clic para seleccionar archivos
             </p>
           </div>
@@ -344,154 +435,148 @@ export default function MergePDF() {
               justifyContent: 'space-between',
               marginBottom: 16,
             }}>
-              <h2 style={{
-                fontSize: 16,
-                fontWeight: 600,
-                color: '#fff',
-                margin: 0,
-              }}>
+              <h2 style={{ fontSize: 16, fontWeight: 600, color: '#fff', margin: 0 }}>
                 {files.length} archivo{files.length !== 1 ? 's' : ''} seleccionado{files.length !== 1 ? 's' : ''}
               </h2>
               <button
                 onClick={() => setFiles([])}
                 style={{
-                  background: 'none',
-                  border: 'none',
-                  color: 'rgba(255,100,100,.7)',
-                  cursor: 'pointer',
-                  fontSize: 13,
-                  padding: 0,
+                  background: 'none', border: 'none',
+                  color: 'rgba(255,100,100,.7)', cursor: 'pointer',
+                  fontSize: 13, padding: 0,
                 }}
               >
                 Limpiar todo
               </button>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div ref={listRef} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {files.map((fileObj, index) => (
                 <div
                   key={fileObj.id}
+                  data-file-item
                   draggable
-                  onDragStart={(e) => handleDragStart(e, index)}
-                  onDragOver={handleDragOver}
-                  onDrop={(e) => handleDropOnItem(e, index)}
+                  onDragStart={(e) => handleMouseDragStart(e, index)}
+                  onDragOver={handleMouseDragOver}
+                  onDrop={(e) => handleMouseDropOnItem(e, index)}
+                  onTouchStart={(e) => handleTouchStart(e, index)}
+                  onTouchMove={handleTouchMove}
+                  onTouchEnd={handleTouchEnd}
+                  className="file-card"
                   style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 12,
                     background: 'rgba(255,255,255,.08)',
                     border: `1px solid ${draggedIndex === index ? 'rgba(110,231,183,.5)' : 'rgba(255,255,255,.1)'}`,
                     borderRadius: 8,
                     padding: 12,
                     transition: 'all .2s ease',
                     opacity: draggedIndex === index ? 0.5 : 1,
-                    height: 80,
                     boxSizing: 'border-box',
+                    touchAction: 'none',
+                    userSelect: 'none',
+                    WebkitUserSelect: 'none',
+                    cursor: 'grab',
                   }}
                 >
-                  {/* Drag Handle */}
-                  <div style={{
+                  {/* Desktop layout */}
+                  <div className="file-card-desktop" style={{
                     display: 'flex',
-                    flexDirection: 'column',
                     alignItems: 'center',
-                    gap: 2,
-                    cursor: 'grab',
-                    flexShrink: 0,
+                    gap: 12,
+                    height: 56,
                   }}>
-                    <div style={{ width: 4, height: 4, background: 'rgba(255,255,255,.4)', borderRadius: '50%' }} />
-                    <div style={{ width: 4, height: 4, background: 'rgba(255,255,255,.4)', borderRadius: '50%' }} />
-                    <div style={{ width: 4, height: 4, background: 'rgba(255,255,255,.4)', borderRadius: '50%' }} />
-                  </div>
 
-                  {/* Thumbnail — primera página del PDF */}
-                  <FileThumbnail file={fileObj.file} size={56} />
+                    <FileThumbnail file={fileObj.file} size={56} />
 
-                  {/* File Info */}
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{
-                      fontSize: 14,
-                      fontWeight: 500,
-                      color: '#fff',
-                      margin: '0 0 4px',
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{
+                        fontSize: 14, fontWeight: 500, color: '#fff',
+                        margin: '0 0 4px',
+                        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                      }}>
+                        {fileObj.name}
+                      </p>
+                      <p style={{ fontSize: 12, color: 'rgba(255,255,255,.5)', margin: 0 }}>
+                        {formatFileSize(fileObj.size)}
+                      </p>
+                    </div>
+
+                    <div style={{
+                      background: 'rgba(110,231,183,.2)', color: '#6ee7b7',
+                      padding: '4px 10px', borderRadius: 4,
+                      fontSize: 12, fontWeight: 600,
+                      minWidth: 28, textAlign: 'center', flexShrink: 0,
                     }}>
-                      {fileObj.name}
-                    </p>
-                    <p style={{
-                      fontSize: 12,
-                      color: 'rgba(255,255,255,.5)',
-                      margin: 0,
+                      #{index + 1}
+                    </div>
+
+                    <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                      <button onClick={() => moveFile(index, 'up')} disabled={index === 0} style={chevronBtnStyle(index === 0)}>
+                        <ChevronUp size={16} />
+                      </button>
+                      <button onClick={() => moveFile(index, 'down')} disabled={index === files.length - 1} style={chevronBtnStyle(index === files.length - 1)}>
+                        <ChevronDown size={16} />
+                      </button>
+                      <button onClick={() => requestRemoveFile(fileObj)} style={deleteBtnStyle}>
+                        <X size={16} />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Mobile layout */}
+                  <div className="file-card-mobile" style={{ display: 'none' }}>
+                    {/* Top row: handle + thumbnail + name */}
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+
+                      <FileThumbnail file={fileObj.file} size={48} />
+
+                      {/* Name + size, full width */}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{
+                          fontSize: 13, fontWeight: 500, color: '#fff',
+                          margin: '0 0 3px',
+                          wordBreak: 'break-word',
+                          lineHeight: 1.4,
+                          display: '-webkit-box',
+                          WebkitLineClamp: 3,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
+                        }}>
+                          {fileObj.name}
+                        </p>
+                        <p style={{ fontSize: 11, color: 'rgba(255,255,255,.5)', margin: 0 }}>
+                          {formatFileSize(fileObj.size)}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Bottom row: order badge + arrow controls + delete */}
+                    <div style={{
+                      display: 'flex', alignItems: 'center',
+                      justifyContent: 'space-between',
+                      marginTop: 10,
+                      paddingTop: 10,
+                      borderTop: '1px solid rgba(255,255,255,.07)',
                     }}>
-                      {formatFileSize(fileObj.size)}
-                    </p>
-                  </div>
+                      <div style={{
+                        background: 'rgba(110,231,183,.2)', color: '#6ee7b7',
+                        padding: '3px 10px', borderRadius: 4,
+                        fontSize: 12, fontWeight: 600,
+                      }}>
+                        #{index + 1}
+                      </div>
 
-                  {/* Order Badge */}
-                  <div style={{
-                    background: 'rgba(110,231,183,.2)',
-                    color: '#6ee7b7',
-                    padding: '4px 10px',
-                    borderRadius: 4,
-                    fontSize: 12,
-                    fontWeight: 600,
-                    minWidth: 28,
-                    textAlign: 'center',
-                    flexShrink: 0,
-                  }}>
-                    #{index + 1}
-                  </div>
-
-                  {/* Controls */}
-                  <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
-                    <button
-                      onClick={() => moveFile(index, 'up')}
-                      disabled={index === 0}
-                      style={{
-                        background: 'rgba(255,255,255,.1)',
-                        border: '1px solid rgba(255,255,255,.2)',
-                        color: index === 0 ? 'rgba(255,255,255,.2)' : 'rgba(255,255,255,.7)',
-                        cursor: index === 0 ? 'not-allowed' : 'pointer',
-                        padding: 6,
-                        borderRadius: 4,
-                        transition: 'all .2s ease',
-                        display: 'flex',
-                      }}
-                    >
-                      <ChevronUp size={16} />
-                    </button>
-                    <button
-                      onClick={() => moveFile(index, 'down')}
-                      disabled={index === files.length - 1}
-                      style={{
-                        background: 'rgba(255,255,255,.1)',
-                        border: '1px solid rgba(255,255,255,.2)',
-                        color: index === files.length - 1 ? 'rgba(255,255,255,.2)' : 'rgba(255,255,255,.7)',
-                        cursor: index === files.length - 1 ? 'not-allowed' : 'pointer',
-                        padding: 6,
-                        borderRadius: 4,
-                        transition: 'all .2s ease',
-                        display: 'flex',
-                      }}
-                    >
-                      <ChevronDown size={16} />
-                    </button>
-                    <button
-                      onClick={() => requestRemoveFile(fileObj)}
-                      style={{
-                        background: 'rgba(239,68,68,.1)',
-                        border: '1px solid rgba(239,68,68,.2)',
-                        color: 'rgba(239,68,68,.7)',
-                        cursor: 'pointer',
-                        padding: 6,
-                        borderRadius: 4,
-                        transition: 'all .2s ease',
-                        display: 'flex',
-                      }}
-                    >
-                      <X size={16} />
-                    </button>
+                      <div style={{ display: 'flex', gap: 6 }}>
+                        <button onClick={() => moveFile(index, 'up')} disabled={index === 0} style={chevronBtnStyle(index === 0)}>
+                          <ChevronUp size={16} />
+                        </button>
+                        <button onClick={() => moveFile(index, 'down')} disabled={index === files.length - 1} style={chevronBtnStyle(index === files.length - 1)}>
+                          <ChevronDown size={16} />
+                        </button>
+                        <button onClick={() => requestRemoveFile(fileObj)} style={deleteBtnStyle}>
+                          <X size={16} />
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -499,19 +584,13 @@ export default function MergePDF() {
           </div>
         )}
 
-        {/* Merge Button */}
         {files.length >= 2 && (
-         <Button 
-          onClick={handleMerge} 
-          loading={loading}
-          icon={Download}
-          sticky
-          >
-           Unir {files.length} PDFs
-        </Button>
+          <Button onClick={handleMerge} loading={loading} icon={Download} sticky>
+            Unir {files.length} PDFs
+          </Button>
         )}
 
-        {/* ── Modal confirmación de eliminación ── */}
+        {/* Modal confirmación de eliminación */}
         {confirmDelete && (
           <div
             onClick={() => setConfirmDelete(null)}
@@ -607,14 +686,39 @@ export default function MergePDF() {
         )}
 
         <style>{`
-          @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-          }
-          @keyframes fadeIn  { from{opacity:0} to{opacity:1} }
+          @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+          @keyframes fadeIn { from{opacity:0} to{opacity:1} }
           @keyframes slideUp { from{opacity:0;transform:translateY(14px) scale(.97)} to{opacity:1;transform:translateY(0) scale(1)} }
+
+          @media (max-width: 600px) {
+            .file-card-desktop { display: none !important; }
+            .file-card-mobile { display: block !important; }
+          }
         `}</style>
       </div>
     </div>
   )
+}
+
+// Shared button styles extracted for brevity
+const chevronBtnStyle = (disabled) => ({
+  background: 'rgba(255,255,255,.1)',
+  border: '1px solid rgba(255,255,255,.2)',
+  color: disabled ? 'rgba(255,255,255,.2)' : 'rgba(255,255,255,.7)',
+  cursor: disabled ? 'not-allowed' : 'pointer',
+  padding: 6,
+  borderRadius: 4,
+  transition: 'all .2s ease',
+  display: 'flex',
+})
+
+const deleteBtnStyle = {
+  background: 'rgba(239,68,68,.1)',
+  border: '1px solid rgba(239,68,68,.2)',
+  color: 'rgba(239,68,68,.7)',
+  cursor: 'pointer',
+  padding: 6,
+  borderRadius: 4,
+  transition: 'all .2s ease',
+  display: 'flex',
 }

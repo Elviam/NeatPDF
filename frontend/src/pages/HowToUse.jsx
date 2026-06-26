@@ -207,18 +207,6 @@ export default function HowToUse() {
 
       <main style={{ maxWidth: 820, margin: '0 auto', padding: '60px 32px 120px', position: 'relative', zIndex: 1 }}>
 
-        {/* Breadcrumb */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 40, fontSize: 13, color: 'rgba(255,255,255,.35)' }}>
-          <span style={{ cursor: 'pointer', transition: 'color .18s' }}
-            onClick={() => navigate('/')}
-            onMouseEnter={e => e.target.style.color = 'rgba(255,255,255,.7)'}
-            onMouseLeave={e => e.target.style.color = 'rgba(255,255,255,.35)'}>
-            Inicio
-          </span>
-          <span style={{ color: 'rgba(255,255,255,.2)' }}>/</span>
-          <span style={{ color: 'rgba(255,255,255,.6)' }}>Cómo usar NeatPDF</span>
-        </div>
-
         {/* Header */}
         <div style={{ marginBottom: 52, animation: 'fadeUp .7s ease both' }}>
           <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '1.8px', textTransform: 'uppercase', color: 'var(--purple, #a78bfa)', margin: '0 0 14px' }}>

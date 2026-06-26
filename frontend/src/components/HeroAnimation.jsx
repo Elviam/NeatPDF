@@ -268,8 +268,7 @@ export default function HeroAnimation() {
             <div style={{
               position: 'relative',
               height: 'clamp(38px, 6vw, 60px)',
-              background: 'rgba(12,12,18,.78)',
-              backdropFilter: 'blur(16px)',
+              background: 'rgba(12,12,18,.98)',
               border: '1px solid rgba(255,255,255,.14)',
               borderRadius: 14,
               boxShadow: '0 26px 42px -16px rgba(0,0,0,.65)',
@@ -395,28 +394,28 @@ export default function HeroAnimation() {
                 width: 'clamp(4px, 0.8vw, 6px)',
                 height: 'clamp(4px, 0.8vw, 6px)',
                 borderRadius: '50%',
-                background: 'rgba(255,255,255,.18)',
+                background: 'rgba(255,255,255,.15)',
                 display: 'inline-block'
               }} />
               <span className="npdf-dot-b" style={{
                 width: 'clamp(4px, 0.8vw, 6px)',
                 height: 'clamp(4px, 0.8vw, 6px)',
                 borderRadius: '50%',
-                background: 'rgba(255,255,255,.18)',
+                background: 'rgba(255,255,255,.15)',
                 display: 'inline-block'
               }} />
               <span className="npdf-dot-c" style={{
                 width: 'clamp(4px, 0.8vw, 6px)',
                 height: 'clamp(4px, 0.8vw, 6px)',
                 borderRadius: '50%',
-                background: 'rgba(255,255,255,.18)',
+                background: 'rgba(255,255,255,.15)',
                 display: 'inline-block'
               }} />
               <span className="npdf-dot-d" style={{
                 width: 'clamp(4px, 0.8vw, 6px)',
                 height: 'clamp(4px, 0.8vw, 6px)',
                 borderRadius: '50%',
-                background: 'rgba(255,255,255,.18)',
+                background: 'rgba(255,255,255,.15)',
                 display: 'inline-block'
               }} />
             </div>
