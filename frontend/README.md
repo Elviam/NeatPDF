@@ -3,14 +3,15 @@
 <img src="https://img.shields.io/badge/Vite-8-646CFF?style=for-the-badge&logo=vite&logoColor=white" />
 <img src="https://img.shields.io/badge/CSS3-Variables_%26_Glassmorphism-1572B6?style=for-the-badge&logo=css3&logoColor=white" />
 <img src="https://img.shields.io/badge/JavaScript-ES2024-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" />
-# NeatPDF — Frontend
+
+ # NeatPDF — Frontend
  
 **Herramientas PDF directo en tu navegador. Rápido, limpio y sin complicaciones.**
  
 [Ver demo en vivo](https://neat-pdf-eta.vercel.app) · [Repositorio backend](../backend/README.md) · [Reportar un bug](https://github.com/Elviam/NeatPDF/issues)
  
 </div>
----
+
  
 ## ¿Qué es NeatPDF?
  
@@ -168,8 +169,6 @@ VITE_GOOGLE_CLIENT_ID=tu_google_client_id_produccion
 ```
  
 ---
- 
-## Capturas de pantalla
  
 ## Capturas de pantalla
 
