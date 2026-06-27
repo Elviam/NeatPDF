@@ -375,7 +375,7 @@ function LoginModal({ open, onClose }) {
         </button>
 
         <p style={{ textAlign:'center', marginTop:12, fontSize:12.5, color:'rgba(255,255,255,.25)' }}>
-          {mode==='login' ? 'No tienes cuenta? ' : 'Ya tienes cuenta? '}
+          {mode==='login' ? '¿No tienes cuenta? ' : 'Ya tienes cuenta? '}
           <span
             onClick={function(){ setMode(mode==='login'?'register':'login'); setError(''); setPassword(''); setShowPassword(false) }}
             style={{ color:'#c4b5fd', cursor:'pointer', fontWeight:400 }}
