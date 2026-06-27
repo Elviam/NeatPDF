@@ -155,54 +155,252 @@ function GridCard({ doc, onDownload, onDelete, onToggleFavorite, deleting }) {
 /* ── List row ── */
 function ListRow({ doc, onDownload, onDelete, onToggleFavorite, deleting }) {
   const color = TOOL_COLORS[doc.tool] || '#fff'
+
   return (
     <div
-      style={{ display: 'flex', alignItems: 'center', gap: 14, background: 'rgba(255,255,255,.04)', border: `1px solid ${doc.is_favorite ? 'rgba(251,191,36,.25)' : 'rgba(255,255,255,.08)'}`, borderRadius: 12, padding: '12px 14px', transition: 'border-color .2s' }}
-      onMouseEnter={e => e.currentTarget.style.borderColor = doc.is_favorite ? 'rgba(251,191,36,.45)' : 'rgba(255,255,255,.14)'}
-      onMouseLeave={e => e.currentTarget.style.borderColor = doc.is_favorite ? 'rgba(251,191,36,.25)' : 'rgba(255,255,255,.08)'}
+      style={{
+        position: 'relative',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12,
+        background: 'rgba(255,255,255,.04)',
+        border: `1px solid ${
+          doc.is_favorite
+            ? 'rgba(251,191,36,.25)'
+            : 'rgba(255,255,255,.08)'
+        }`,
+        borderRadius: 12,
+        padding: 12,
+        transition: 'border-color .2s',
+      }}
+      onMouseEnter={e =>
+        (e.currentTarget.style.borderColor = doc.is_favorite
+          ? 'rgba(251,191,36,.45)'
+          : 'rgba(255,255,255,.14)')
+      }
+      onMouseLeave={e =>
+        (e.currentTarget.style.borderColor = doc.is_favorite
+          ? 'rgba(251,191,36,.25)'
+          : 'rgba(255,255,255,.08)')
+      }
     >
+      {/* Thumbnail */}
       <Thumbnail doc={doc} size="list" />
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <p style={{ fontSize: 14, fontWeight: 500, color: '#fff', margin: '0 0 4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{doc.filename}</p>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-          <span style={{ fontSize: 11, fontWeight: 600, color, background: `${color}14`, border: `1px solid ${color}30`, borderRadius: 100, padding: '2px 8px' }}>{TOOL_LABELS[doc.tool] || doc.tool}</span>
-          <span style={{ fontSize: 12, color: 'rgba(255,255,255,.3)' }}>{formatSize(doc.file_size)}</span>
-          <span style={{ fontSize: 12, color: 'rgba(255,255,255,.25)' }}>{formatDate(doc.created_at)}</span>
+
+      {/* Columna derecha */}
+      <div
+        style={{
+          flex: 1,
+          minWidth: 0,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 6,
+        }}
+      >
+        {/* Nombre ocupa TODA la parte superior */}
+        <p
+          style={{
+            fontSize: 14,
+            fontWeight: 500,
+            color: '#fff',
+            margin: 0,
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }}
+        >
+          {doc.filename}
+        </p>
+
+        {/* Segunda fila */}
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            gap: 12,
+          }}
+        >
+          {/* Información */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              flexWrap: 'wrap',
+              minWidth: 0,
+            }}
+          >
+            <span
+              style={{
+                fontSize: 11,
+                fontWeight: 600,
+                color,
+                background: `${color}14`,
+                border: `1px solid ${color}30`,
+                borderRadius: 100,
+                padding: '2px 8px',
+              }}
+            >
+              {TOOL_LABELS[doc.tool] || doc.tool}
+            </span>
+
+            <span
+              style={{
+                fontSize: 12,
+                color: 'rgba(255,255,255,.3)',
+              }}
+            >
+              {formatSize(doc.file_size)}
+            </span>
+
+            <span
+              style={{
+                fontSize: 12,
+                color: 'rgba(255,255,255,.25)',
+              }}
+            >
+              {formatDate(doc.created_at)}
+            </span>
+          </div>
+
+          {/* Botones */}
+          <div
+            style={{
+              display: 'flex',
+              gap: 6,
+              flexShrink: 0,
+            }}
+          >
+            <button
+              onClick={() => onToggleFavorite(doc)}
+              style={{
+                width: 34,
+                height: 34,
+                borderRadius: 8,
+                background: doc.is_favorite
+                  ? 'rgba(251,191,36,.1)'
+                  : 'rgba(255,255,255,.05)',
+                border: `1px solid ${
+                  doc.is_favorite
+                    ? 'rgba(251,191,36,.35)'
+                    : 'rgba(255,255,255,.1)'
+                }`,
+                color: doc.is_favorite
+                  ? '#fbbf24'
+                  : 'rgba(255,255,255,.35)',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all .18s',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = 'rgba(251,191,36,.18)'
+                e.currentTarget.style.borderColor = 'rgba(251,191,36,.5)'
+                e.currentTarget.style.color = '#fbbf24'
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = doc.is_favorite
+                  ? 'rgba(251,191,36,.1)'
+                  : 'rgba(255,255,255,.05)'
+                e.currentTarget.style.borderColor = doc.is_favorite
+                  ? 'rgba(251,191,36,.35)'
+                  : 'rgba(255,255,255,.1)'
+                e.currentTarget.style.color = doc.is_favorite
+                  ? '#fbbf24'
+                  : 'rgba(255,255,255,.35)'
+              }}
+            >
+              <Star
+                size={15}
+                fill={doc.is_favorite ? '#fbbf24' : 'none'}
+              />
+            </button>
+
+            <button
+              onClick={() => onDownload(doc)}
+              style={{
+                width: 34,
+                height: 34,
+                borderRadius: 8,
+                background: 'rgba(255,255,255,.05)',
+                border: '1px solid rgba(255,255,255,.1)',
+                color: 'rgba(255,255,255,.55)',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all .18s',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = `${color}18`
+                e.currentTarget.style.borderColor = `${color}40`
+                e.currentTarget.style.color = color
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'rgba(255,255,255,.05)'
+                e.currentTarget.style.borderColor =
+                  'rgba(255,255,255,.1)'
+                e.currentTarget.style.color =
+                  'rgba(255,255,255,.55)'
+              }}
+            >
+              <Download size={15} />
+            </button>
+
+            <button
+              onClick={() => onDelete(doc.id)}
+              disabled={deleting === doc.id}
+              style={{
+                width: 34,
+                height: 34,
+                borderRadius: 8,
+                background: 'rgba(239,68,68,.07)',
+                border: '1px solid rgba(239,68,68,.15)',
+                color: 'rgba(239,68,68,.55)',
+                cursor: deleting === doc.id ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all .18s',
+                opacity: deleting === doc.id ? 0.5 : 1,
+              }}
+              onMouseEnter={e => {
+                if (deleting !== doc.id) {
+                  e.currentTarget.style.background =
+                    'rgba(239,68,68,.15)'
+                  e.currentTarget.style.color = '#fca5a5'
+                }
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background =
+                  'rgba(239,68,68,.07)'
+                e.currentTarget.style.color =
+                  'rgba(239,68,68,.55)'
+              }}
+            >
+              {deleting === doc.id ? (
+                <div
+                  style={{
+                    width: 13,
+                    height: 13,
+                    border: '2px solid rgba(239,68,68,.3)',
+                    borderTop: '2px solid #fca5a5',
+                    borderRadius: '50%',
+                    animation: 'spin .7s linear infinite',
+                  }}
+                />
+              ) : (
+                <Trash2 size={15} />
+              )}
+            </button>
+          </div>
         </div>
-      </div>
-      <div style={{ display: 'flex', gap: 8, flexShrink: 0, alignItems: 'center' }}>
-        <button
-          onClick={() => onToggleFavorite(doc)}
-          style={{ width: 34, height: 34, borderRadius: 8, background: doc.is_favorite ? 'rgba(251,191,36,.1)' : 'rgba(255,255,255,.05)', border: `1px solid ${doc.is_favorite ? 'rgba(251,191,36,.35)' : 'rgba(255,255,255,.1)'}`, color: doc.is_favorite ? '#fbbf24' : 'rgba(255,255,255,.35)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all .18s' }}
-          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(251,191,36,.18)'; e.currentTarget.style.borderColor = 'rgba(251,191,36,.5)'; e.currentTarget.style.color = '#fbbf24' }}
-          onMouseLeave={e => { e.currentTarget.style.background = doc.is_favorite ? 'rgba(251,191,36,.1)' : 'rgba(255,255,255,.05)'; e.currentTarget.style.borderColor = doc.is_favorite ? 'rgba(251,191,36,.35)' : 'rgba(255,255,255,.1)'; e.currentTarget.style.color = doc.is_favorite ? '#fbbf24' : 'rgba(255,255,255,.35)' }}
-        >
-          <Star size={15} fill={doc.is_favorite ? '#fbbf24' : 'none'} />
-        </button>
-        <button
-          onClick={() => onDownload(doc)}
-          style={{ width: 34, height: 34, borderRadius: 8, background: 'rgba(255,255,255,.05)', border: '1px solid rgba(255,255,255,.1)', color: 'rgba(255,255,255,.55)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all .18s' }}
-          onMouseEnter={e => { e.currentTarget.style.background = `${color}18`; e.currentTarget.style.borderColor = `${color}40`; e.currentTarget.style.color = color }}
-          onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,.05)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,.1)'; e.currentTarget.style.color = 'rgba(255,255,255,.55)' }}
-        >
-          <Download size={15} />
-        </button>
-        <button
-          onClick={() => onDelete(doc.id)}
-          disabled={deleting === doc.id}
-          style={{ width: 34, height: 34, borderRadius: 8, background: 'rgba(239,68,68,.07)', border: '1px solid rgba(239,68,68,.15)', color: 'rgba(239,68,68,.55)', cursor: deleting === doc.id ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all .18s', opacity: deleting === doc.id ? 0.5 : 1 }}
-          onMouseEnter={e => { if (deleting !== doc.id) { e.currentTarget.style.background = 'rgba(239,68,68,.15)'; e.currentTarget.style.color = '#fca5a5' } }}
-          onMouseLeave={e => { e.currentTarget.style.background = 'rgba(239,68,68,.07)'; e.currentTarget.style.color = 'rgba(239,68,68,.55)' }}
-        >
-          {deleting === doc.id
-            ? <div style={{ width: 13, height: 13, border: '2px solid rgba(239,68,68,.3)', borderTop: '2px solid #fca5a5', borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
-            : <Trash2 size={15} />}
-        </button>
       </div>
     </div>
   )
 }
-
 /* ══════════════════════════════════════════
    PÁGINA PRINCIPAL
 ══════════════════════════════════════════ */

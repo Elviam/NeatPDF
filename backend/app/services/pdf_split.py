@@ -1,6 +1,7 @@
 import io
 import zipfile
 from pypdf import PdfReader, PdfWriter
+import fitz  # PyMuPDF
 
 
 def split_pdf(file_bytes: bytes, start_page: int, end_page: int) -> bytes:
@@ -26,6 +27,20 @@ def split_pdf(file_bytes: bytes, start_page: int, end_page: int) -> bytes:
     output.seek(0)
     return output.read()
 
+import fitz  # PyMuPDF
+
+def split_pdf_selected_pages(file_bytes: bytes, pages: list[int]) -> bytes:
+    """Extrae páginas específicas (1-indexed) y las devuelve como un solo PDF."""
+    src = fitz.open(stream=file_bytes, filetype="pdf")
+    out = fitz.open()
+    for p in pages:
+        if p < 1 or p > src.page_count:
+            raise ValueError(f"Página {p} fuera de rango (total: {src.page_count})")
+        out.insert_pdf(src, from_page=p - 1, to_page=p - 1)
+    result = out.tobytes(deflate=True)
+    src.close()
+    out.close()
+    return result
 
 def split_pdf_all_pages(file_bytes: bytes) -> bytes:
     """

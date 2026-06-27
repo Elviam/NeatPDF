@@ -10,8 +10,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker
 
 const SPLIT_ALL_API   = `${import.meta.env.VITE_API_URL}/api/split/all`
 const SPLIT_RANGE_API = `${import.meta.env.VITE_API_URL}/api/split/range`
-const MERGE_API = `${import.meta.env.VITE_API_URL}/api/merge/`
-
+const SPLIT_PAGES_API = `${import.meta.env.VITE_API_URL}/api/split/pages`
 /* paleta de colores por índice de rango */
 const RANGE_COLORS = [
   { line: '#93c5fd', bg: 'rgba(147,197,253,.07)', border: 'rgba(147,197,253,.22)' },
@@ -434,18 +433,6 @@ export default function SplitPDF() {
       results.forEach((r, i) => setTimeout(() => triggerDownload(r.blob, fileNameFn(r, i)), i * 300))
     }
   }
-  const mergeBlobs = async (results) => {
-  const fd = new FormData()
-  results.forEach((r, i) => {
-    fd.append('files', new File([r.blob], `page_${i + 1}.pdf`, { type: 'application/pdf' }))
-  })
-  const res = await axios.post(MERGE_API, fd, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-    responseType: 'blob',
-  })
-  return res.data
-}
-
   /* ── split all ── */
   const handleSplitAll = async () => {
     if (!file) return
@@ -494,39 +481,50 @@ export default function SplitPDF() {
   }
 
   /* ── split por páginas específicas ── */
- const handleExtractPages = async () => {
-    if (!file || selectedPages.size === 0) return
-    setLoading(true); setError(''); setSuccess('')
-    try {
-      const sorted = [...selectedPages].sort((a, b) => a - b)
-      const requests = sorted.map(p =>
-        axios.post(SPLIT_RANGE_API, buildFD(), {
-          headers: { 'Content-Type': 'multipart/form-data' },
-          params: { start_page: p, end_page: p },
-          responseType: 'blob',
-        }).then(res => ({ page: p, blob: res.data }))
-      )
-      const results = await Promise.all(requests)
+    const handleExtractPages = async () => {
+      if (!file || selectedPages.size === 0) return
+      setLoading(true); setError(''); setSuccess('')
+      try {
+        const sorted = [...selectedPages].sort((a, b) => a - b)
 
-      if (pagesOutputMode === 'merge' && results.length > 1) {
-        const mergedBlob = await mergeBlobs(results)
-        triggerDownload(mergedBlob, `${file.name.replace(/\.pdf$/i, '')}_combined_pages.pdf`)
-        setSuccess(`✓ ${results.length} páginas combinadas en un solo PDF!`)
-      } else {
-        await downloadResults(
-          results,
-          (r) => `${file.name.replace(/\.pdf$/i, '')}_split_p${r.page}.pdf`,
-          `${file.name.replace(/\.pdf$/i, '')}_split.zip`,
-          (r) => `${file.name.replace(/\.pdf$/i, '')}_split_p${r.page}.pdf`,
-        )
-        setSuccess(`✓ ${results.length} página${results.length > 1 ? 's' : ''} extraída${results.length > 1 ? 's' : ''} exitosamente!`)
-      }
-      removeFile()
-    } catch (e) {
-      console.error(e)
-      setError(e.response?.data?.detail || 'Error al extraer páginas')
-    } finally { setLoading(false) }
-  }
+        if (pagesOutputMode === 'merge' || sorted.length === 1) {
+          const outputName = `${file.name.replace(/\.pdf$/i, '')}_split_combined.pdf`
+
+          const fd = buildFD()
+          const res = await axios.post(SPLIT_PAGES_API, fd, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+            params: { pages: sorted.join(','), output_name: outputName },
+            responseType: 'blob',
+          })
+          triggerDownload(res.data, outputName)
+          setSuccess(`✓ ${sorted.length} página${sorted.length > 1 ? 's' : ''} extraída${sorted.length > 1 ? 's' : ''} exitosamente!`)
+
+        } else {
+          const requests = sorted.map(p => {
+            const outputName = `${file.name.replace(/\.pdf$/i, '')}_split_p${p}.pdf`
+            return axios.post(SPLIT_RANGE_API, buildFD(), {
+              headers: { 'Content-Type': 'multipart/form-data' },
+              params: { start_page: p, end_page: p, output_name: outputName },
+              responseType: 'blob',
+            }).then(res => ({ page: p, blob: res.data, name: outputName }))
+          })
+          const results = await Promise.all(requests)
+          await downloadResults(
+            results,
+            (r) => r.name,
+            `${file.name.replace(/\.pdf$/i, '')}_split.zip`,
+            (r) => r.name,
+          )
+          setSuccess(`✓ ${results.length} página${results.length > 1 ? 's' : ''} extraída${results.length > 1 ? 's' : ''} exitosamente!`)
+        }
+
+        setTimeout(() => setSuccess(''), 4000)
+        removeFile()
+      } catch (e) {
+        console.error(e)
+        setError(e.response?.data?.detail || 'Error al extraer páginas')
+      } finally { setLoading(false) }
+    }
   const fmt = (b) => { if (!b) return '0 B'; const k = 1024, s = ['B', 'KB', 'MB']; const i = Math.floor(Math.log(b) / Math.log(k)); return Math.round(b / Math.pow(k, i) * 100) / 100 + ' ' + s[i] }
 
   const galleryMaxHeight = galleryRowHeight
